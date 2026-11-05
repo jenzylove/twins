@@ -1,0 +1,17 @@
+node_modules/
+.env
+.env.*
+!.env.example
+dist/
+build/
+.output/
+.nitro/
+.vercel/
+.netlify/
+*.log
+.DS_Store
+coverage/
+data/
+workspaces/
+*.pem
+*.key
