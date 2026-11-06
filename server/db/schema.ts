@@ -49,6 +49,7 @@ export const merges = pgTable("merges", {
   addedDiagsJson: text("added_diags_json").notNull().default("[]"),
   checkMs: integer("check_ms").notNull().default(0),
   summary: text("summary").notNull().default(""),
+  setName: text("set_name").notNull().default(""),
   createdAt: text("created_at")
     .notNull()
     .default(sql`now()`),

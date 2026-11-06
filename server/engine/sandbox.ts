@@ -24,12 +24,24 @@ async function getSandbox(sandboxId: string): Promise<Sandbox> {
   try {
     return await Sandbox.get({ name: sandboxId, ...credentials() });
   } catch (err) {
+    console.error("[twins] sandbox lookup failed:", redact(String(err)));
     throw new EngineError(
       "sandbox_gone",
       "The sandbox for this repo is no longer running.",
       { cause: String(err) },
     );
   }
+}
+
+/** Strip anything credential shaped before an error reaches the console. */
+export function redact(text: string): string {
+  return text
+    .replace(
+      /(authorization|bearer|token|secret|password|key)(["'\s:=]+)[A-Za-z0-9._~+/=-]{8,}/gi,
+      "$1$2[redacted]",
+    )
+    .replace(/eyJ[A-Za-z0-9._-]{20,}/g, "[redacted]")
+    .slice(0, 1500);
 }
 
 type Sh = { code: number; out: string; err: string };
@@ -69,6 +81,7 @@ export async function createRepoSandbox(info: {
     });
     return { sandboxId: sbx.name };
   } catch (err) {
+    console.error("[twins] sandbox create failed:", redact(String(err)));
     throw new EngineError(
       "sandbox_create_failed",
       "Could not start a sandbox for this repo.",
@@ -81,8 +94,11 @@ export async function prepareSandbox(
   sandboxId: string,
   targets: string[],
   hasBuild: boolean,
+  onStage: (stage: string) => void = () => undefined,
 ): Promise<CheckResult> {
   const sbx = await getSandbox(sandboxId);
+  let checkerDone = false;
+  onStage("installing dependencies");
   const installRepo = async () => {
     const r = await sh(
       sbx,
@@ -119,14 +135,23 @@ npm install --prefix /tmp/checker @typescript/native-preview --no-audit --no-fun
       );
     }
   };
-  await Promise.all([installRepo(), installChecker()]);
+  await Promise.all([
+    installRepo().then(() => {
+      if (!checkerDone) onStage("installing checker");
+    }),
+    installChecker().then(() => {
+      checkerDone = true;
+    }),
+  ]);
   try {
     await sbx.updateNetworkPolicy("deny-all");
   } catch {
     // Policy update is best effort; the checks themselves never run repo scripts.
   }
+  onStage(hasBuild ? "building" : "type checking baseline");
   const first = await runCheck(sandboxId, targets, hasBuild);
   if (!first.build?.ran) return first;
+  onStage("type checking baseline");
   // The build can generate files (route trees, codegen) that the type check
   // needs, so take the baseline diagnostics again now that it has run.
   const settled = await runCheck(sandboxId, targets, false);
@@ -233,7 +258,8 @@ export async function stopSandbox(sandboxId: string): Promise<void> {
 export async function isAlive(sandboxId: string): Promise<boolean> {
   try {
     const sbx = await Sandbox.get({ name: sandboxId, ...credentials() });
-    return sbx.status === "running";
+    // stopped, stopping, failed, aborted and snapshotting all count as dead.
+    return sbx.status === "running" || sbx.status === "pending";
   } catch {
     return false;
   }

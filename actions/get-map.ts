@@ -1,5 +1,6 @@
 import { defineAction } from "@agent-native/core/action";
 import { z } from "zod";
+import type { Diag } from "../server/engine/check.js";
 import {
   compactSet,
   listMerges,
@@ -8,6 +9,15 @@ import {
   parseScan,
   twinsErrors,
 } from "../server/lib/twins.js";
+
+function parseDiags(json: string): Diag[] {
+  try {
+    const v = JSON.parse(json || "[]");
+    return Array.isArray(v) ? (v as Diag[]) : [];
+  } catch {
+    return [];
+  }
+}
 
 export default defineAction({
   description:
@@ -86,6 +96,20 @@ export default defineAction({
         linesAdded: z.number(),
         checkMs: z.number(),
         summary: z.string(),
+        setName: z
+          .string()
+          .describe("The copy set's display name when the merge ran"),
+        added: z
+          .array(
+            z.object({
+              file: z.string(),
+              line: z.number(),
+              col: z.number(),
+              code: z.string(),
+              message: z.string(),
+            }),
+          )
+          .describe("Type errors this merge added (set for refused merges)"),
         createdAt: z.string(),
       }),
     ),
@@ -147,6 +171,12 @@ export default defineAction({
         linesAdded: m.linesAdded,
         checkMs: m.checkMs,
         summary: m.summary,
+        setName:
+          m.setName ||
+          /^Merged (.+?) into /.exec(m.summary)?.[1] ||
+          scan.sets.find((x) => x.id === m.setId)?.name ||
+          m.setId,
+        added: parseDiags(m.addedDiagsJson),
         createdAt: m.createdAt,
       })),
       metrics: {

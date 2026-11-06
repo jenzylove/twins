@@ -45,6 +45,12 @@ CREATE INDEX IF NOT EXISTS repos_owner_created_idx ON repos (owner_email, create
 CREATE INDEX IF NOT EXISTS merges_repo_created_idx ON merges (repo_id, created_at);
 CREATE INDEX IF NOT EXISTS merges_owner_idx ON merges (owner_email)`,
     },
+    {
+      version: 2,
+      name: "merges-set-name",
+      // Additive. Old rows keep '' and get their name derived from summary on read.
+      sql: `ALTER TABLE merges ADD COLUMN IF NOT EXISTS set_name TEXT NOT NULL DEFAULT ''`,
+    },
   ],
   { table: "twins_app_migrations" },
 );

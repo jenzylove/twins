@@ -238,6 +238,7 @@ export default defineAction({
             addedDiagsJson: JSON.stringify(added),
             checkMs: after.ms,
             summary: message,
+            setName: set.name,
             createdAt: nowIso(),
           });
         fail(message, {
@@ -278,6 +279,7 @@ export default defineAction({
           addedDiagsJson: "[]",
           checkMs: after.ms,
           summary,
+          setName: set.name,
           createdAt: nowIso(),
         });
       return {

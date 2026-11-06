@@ -25,6 +25,7 @@ import {
   createRepoSandbox,
   isAlive,
   prepareSandbox,
+  redact,
   writeFiles,
 } from "../engine/sandbox.js";
 
@@ -179,11 +180,11 @@ export async function transitionRepo(
 export async function markUndone(mergeId: string): Promise<boolean> {
   const rows = await getDb()
     .update(schema.merges)
-    .set({ status: mergeMachine.transition("kept", "undo") })
+    .set({ status: mergeMachine.transition("kept", "undo") as "undone" })
     .where(
       and(
         eq(schema.merges.id, mergeId),
-        inArray(schema.merges.status, [...mergeMachine.fromStates("undo")]),
+        inArray(schema.merges.status, [...mergeMachine.fromStates("undo")] as MergeRow["status"][]),
       ),
     )
     .returning({ id: schema.merges.id });
@@ -290,7 +291,16 @@ const inflight = new Map<string, Promise<void>>();
 const HEARTBEAT_MS = 8_000;
 const STALE_MS = 40_000;
 
+/** Marker in status_detail meaning the next call retries by itself. */
+const RETRY_NOTE = "Twins will retry on the next request.";
+
 function plainDetail(err: unknown): string {
+  if (
+    err instanceof EngineError &&
+    (err.code === "sandbox_create_failed" || err.code === "sandbox_gone")
+  ) {
+    return `${err.message} ${RETRY_NOTE}`;
+  }
   if (err instanceof EngineError) return err.message;
   const msg = err instanceof Error ? err.message : String(err);
   return `Preparation failed: ${msg.slice(0, 200)}`;
@@ -305,7 +315,17 @@ async function doPrepare(row: RepoRow): Promise<void> {
       .where(eq(schema.repos.id, row.id))
       .catch(() => undefined);
   }, HEARTBEAT_MS);
+  const stage = (detail: string) => {
+    void getDb()
+      .update(schema.repos)
+      .set({ statusDetail: detail, updatedAt: nowIso() })
+      .where(
+        and(eq(schema.repos.id, row.id), eq(schema.repos.status, "preparing")),
+      )
+      .catch(() => undefined);
+  };
   try {
+    stage("starting sandbox");
     const dir = await ensureWorkdir(row);
     const scan = parseScan(await reload(row.id));
     const targets = checkTargets(dir);
@@ -320,7 +340,7 @@ async function doPrepare(row: RepoRow): Promise<void> {
       .update(schema.repos)
       .set({ sandboxId, hasBuild, updatedAt: nowIso() })
       .where(eq(schema.repos.id, row.id));
-    const result = await prepareSandbox(sandboxId, targets, hasBuild);
+    const result = await prepareSandbox(sandboxId, targets, hasBuild, stage);
     const priorBaseline = row.baselineJson
       ? (JSON.parse(row.baselineJson) as Baseline)
       : null;
@@ -345,6 +365,14 @@ async function doPrepare(row: RepoRow): Promise<void> {
       statusDetail: null,
     });
   } catch (err) {
+    console.error(
+      `[twins] prepare failed for ${row.id}:`,
+      redact(
+        err instanceof EngineError
+          ? `${err.code}: ${err.message} ${JSON.stringify(err.details ?? "")}`
+          : String(err instanceof Error ? (err.stack ?? err.message) : err),
+      ),
+    );
     await transitionRepo(row.id, "fail", { statusDetail: plainDetail(err) });
   } finally {
     clearInterval(beat);
@@ -408,6 +436,20 @@ export async function ensureReady(
     }
     cur = await reload(cur.id);
   }
+  if (
+    cur.status === "failed" &&
+    cur.scanJson &&
+    (cur.baselineJson || (cur.statusDetail ?? "").includes(RETRY_NOTE))
+  ) {
+    // A sandbox problem, not a repo problem: try to start again right now.
+    await transitionRepo(cur.id, "reprepare", {
+      sandboxId: null,
+      statusDetail: "starting sandbox",
+    });
+    cur = await reload(cur.id);
+    await startPrepare(cur);
+    cur = await reload(cur.id);
+  }
   if (cur.status === "failed") {
     bail(
       `Twins could not prepare this repo: ${cur.statusDetail ?? "unknown reason"}.`,
@@ -418,7 +460,10 @@ export async function ensureReady(
   const dir = await ensureWorkdir(cur);
   if (!cur.sandboxId || !(await isAlive(cur.sandboxId))) {
     // Sandbox expired or was stopped: rebuild it and replay the kept edits.
-    await transitionRepo(cur.id, "reprepare", { sandboxId: null });
+    await transitionRepo(cur.id, "reprepare", {
+      sandboxId: null,
+      statusDetail: "starting sandbox",
+    });
     cur = await reload(cur.id);
     await startPrepare(cur);
     cur = await reload(cur.id);
