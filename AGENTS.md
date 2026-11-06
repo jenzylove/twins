@@ -31,3 +31,17 @@ Use `adding-a-feature` for functional parity and `frontend-design` for a user-fa
 Before building common workspace or agent UI, read `agent-native-toolkit`; for supported customization, read `customizing-agent-native`.
 
 - Guarded verification: run `pnpm agent-native:doctor`; fix findings before done.
+
+## Twins actions
+
+Twins imports a public GitHub repo, finds duplicate code, and merges copies inside a Vercel Sandbox, keeping a merge only if the type check does not get worse. Repo code never runs on this server.
+
+| Action | Use it to |
+| --- | --- |
+| `import-repo` | Import `{ url }`; returns `id`, totals and top 5 copy sets; the sandbox prepares in the background. Poll `get-map` until `status` is `ready`. |
+| `get-map` | Files, sets summary, status, baseline (errors, coverage, build), merges list and duplicate-line metrics for `{ repoId }`. |
+| `find-twins` | List copy sets with members for `{ repoId, kind?, limit? }`. |
+| `compare-twins` | Member source text plus token-level differences for `{ repoId, setId }`; read it before writing a near-copy merge. |
+| `merge-twins` | Merge a set `{ repoId, setId, memberIds?, sharedPath?, edits? }`. Exact copies merge deterministically; pass `edits` (full new file contents) for near copies. Refused with `merge_refused` if the type check gets worse. |
+| `undo-merge` | Revert a kept merge `{ repoId, mergeId }` and confirm the baseline is restored. |
+| `export-patch` | Unified diff of all kept merges `{ repoId }`. |
