@@ -12,10 +12,9 @@ import {
 } from "@agent-native/toolkit/app/chat/ownership-history";
 import { OrgSwitcher } from "@agent-native/toolkit/app/org";
 import { openCommandMenu } from "@agent-native/toolkit/app/shared";
-import { AgentNativeIcon } from "@agent-native/toolkit/app/shared/AgentNativeIcon";
 import {
   IconEdit,
-  IconHome,
+  IconLayoutBoard,
   IconLayoutSidebarLeftCollapse,
   IconLayoutSidebarLeftExpand,
   IconLoader2,
@@ -25,13 +24,14 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 
+import { TwinsMark } from "@/components/twins/bits";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { APP_TITLE } from "@/lib/app-config";
-import { chatThreadPath, HOME_PATH, threadIdFromPath } from "@/lib/chat-paths";
+import { chatThreadPath, threadIdFromPath } from "@/lib/chat-paths";
 import { cn } from "@/lib/utils";
 
 const CHAT_STORAGE_KEY = "chat";
@@ -117,15 +117,19 @@ function persistActiveThreadId(threadId: string) {
   } catch {}
 }
 
-function HomeNavLink({ collapsed }: { collapsed: boolean }) {
-  const t = useT();
+const MAP_PATH = "/map";
+
+function MapNavLink({ collapsed }: { collapsed: boolean }) {
   const location = useLocation();
-  const active = location.pathname === HOME_PATH;
+  const label = "Maps";
+  const active =
+    location.pathname === MAP_PATH ||
+    location.pathname.startsWith(`${MAP_PATH}/`);
   const link = (
     <Link
-      to={HOME_PATH}
+      to={MAP_PATH}
       aria-current={active ? "page" : undefined}
-      aria-label={collapsed ? t("navigation.home") : undefined}
+      aria-label={collapsed ? label : undefined}
       className={cn(
         "flex items-center text-sidebar-accent-foreground transition-colors hover:bg-sidebar-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring",
         active && "bg-sidebar-accent",
@@ -134,10 +138,8 @@ function HomeNavLink({ collapsed }: { collapsed: boolean }) {
           : "h-8 w-full gap-3 rounded-lg px-3 text-sm font-medium",
       )}
     >
-      <IconHome className="size-4 shrink-0" strokeWidth={1.8} />
-      <span className={collapsed ? "sr-only" : "truncate"}>
-        {t("navigation.home")}
-      </span>
+      <IconLayoutBoard className="size-4 shrink-0" strokeWidth={1.8} />
+      <span className={collapsed ? "sr-only" : "truncate"}>{label}</span>
     </Link>
   );
 
@@ -145,7 +147,7 @@ function HomeNavLink({ collapsed }: { collapsed: boolean }) {
     return (
       <Tooltip>
         <TooltipTrigger asChild>{link}</TooltipTrigger>
-        <TooltipContent side="right">{t("navigation.home")}</TooltipContent>
+        <TooltipContent side="right">{label}</TooltipContent>
       </Tooltip>
     );
   }
@@ -374,10 +376,7 @@ export function Sidebar({
                 aria-label={APP_TITLE}
                 className="flex size-8 items-center justify-center rounded outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
               >
-                <AgentNativeIcon
-                  aria-hidden="true"
-                  className="h-3.5 w-6 text-sidebar-accent-foreground"
-                />
+                <TwinsMark className="size-6 text-sidebar-accent-foreground" />
               </Link>
             </TooltipTrigger>
             <TooltipContent side="right">{APP_TITLE}</TooltipContent>
@@ -388,11 +387,11 @@ export function Sidebar({
               to="/"
               className="flex min-w-0 flex-1 items-center gap-3 rounded outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
             >
-              <AgentNativeIcon
-                aria-hidden="true"
-                className="h-3.5 w-6 shrink-0 text-sidebar-accent-foreground"
-              />
-              <span className="truncate text-sm font-semibold text-sidebar-accent-foreground">
+              <TwinsMark className="size-6 shrink-0 text-sidebar-accent-foreground" />
+              <span
+                className="truncate text-[22px] leading-none text-sidebar-accent-foreground"
+                style={{ fontFamily: '"Instrument Serif", serif' }}
+              >
                 {APP_TITLE}
               </span>
             </Link>
@@ -407,7 +406,7 @@ export function Sidebar({
           collapsed ? "items-center gap-1 px-1 py-2" : "pt-1",
         )}
       >
-        <HomeNavLink collapsed={collapsed} />
+        <MapNavLink collapsed={collapsed} />
         <ChatThreadsSection collapsed={collapsed} />
       </nav>
 

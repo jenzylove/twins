@@ -1,9 +1,9 @@
-@import "@fontsource-variable/inter";
-
 @import "tailwindcss";
 @import "@agent-native/toolkit/styles.css";
 
 @source "./**/*.{ts,tsx}";
+
+@import "./components/twins/twins.css";
 
 :root {
   --background: 0 0% 100%;
@@ -228,42 +228,42 @@
   color: hsl(var(--sidebar-accent-foreground));
 }
 
+/* Dark is the default: deep ink blue to sit with the blueprint map. */
 .dark {
-  --background: 0 0% 13%;
-  --foreground: 0 0% 90%;
-  --card: 0 0% 16.47%;
-  --card-foreground: 0 0% 90%;
-  --popover: 0 0% 15%;
-  --popover-foreground: 0 0% 90%;
-  --primary: 0 0% 75%;
-  --primary-foreground: 0 0% 10%;
-  --secondary: 0 0% 18%;
-  --secondary-foreground: 0 0% 90%;
-  --muted: 0 0% 16%;
-  --muted-foreground: 0 0% 60%;
-  --accent: 0 0% 18%;
-  --accent-foreground: 0 0% 90%;
-  --destructive: 0 84% 60%;
+  --background: 222 50% 5%;
+  --foreground: 216 40% 93%;
+  --card: 222 45% 8%;
+  --card-foreground: 216 40% 93%;
+  --popover: 222 45% 8%;
+  --popover-foreground: 216 40% 93%;
+  --primary: 37 100% 64%;
+  --primary-foreground: 30 70% 6%;
+  --secondary: 220 38% 12%;
+  --secondary-foreground: 216 40% 93%;
+  --muted: 220 38% 11%;
+  --muted-foreground: 216 18% 62%;
+  --accent: 220 38% 13%;
+  --accent-foreground: 216 40% 93%;
+  --destructive: 3 100% 66%;
   --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 24%;
-  --input: 0 0% 24%;
-  --ring: 0 0% 60%;
+  --border: 216 32% 16%;
+  --input: 216 32% 20%;
+  --ring: 200 100% 78%;
   --radius: 0.5rem;
-  --sidebar-background: 0 0% 10%;
-  --sidebar-foreground: 0 0% 60%;
-  --sidebar-primary: 0 0% 75%;
-  --sidebar-primary-foreground: 0 0% 10%;
-  --sidebar-accent: 0 0% 16%;
-  --sidebar-accent-foreground: 0 0% 90%;
-  --sidebar-border: 0 0% 20%;
-  --sidebar-ring: 0 0% 60%;
+  --sidebar-background: 222 48% 4%;
+  --sidebar-foreground: 216 18% 62%;
+  --sidebar-primary: 37 100% 64%;
+  --sidebar-primary-foreground: 30 70% 6%;
+  --sidebar-accent: 220 40% 11%;
+  --sidebar-accent-foreground: 216 40% 93%;
+  --sidebar-border: 216 34% 12%;
+  --sidebar-ring: 200 100% 78%;
 }
 
 @layer base {
   body {
     @apply bg-background text-foreground;
-    font-family: "Inter Variable", "Inter", sans-serif;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-family: "Geist", ui-sans-serif, sans-serif;
   }
 }
 

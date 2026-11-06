@@ -47,10 +47,20 @@ configureTracking({
 });
 
 export const links: LinksFunction = () => [
+  { rel: "preconnect", href: "https://fonts.googleapis.com" },
+  {
+    rel: "preconnect",
+    href: "https://fonts.gstatic.com",
+    crossOrigin: "anonymous",
+  },
+  {
+    rel: "stylesheet",
+    href: "https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap",
+  },
   { rel: "stylesheet", href: stylesheet },
 ];
 
-const THEME_INIT_SCRIPT = getThemeInitScript();
+const THEME_INIT_SCRIPT = getThemeInitScript("dark");
 const LOCALE_INIT_SCRIPT = getLocaleInitScript();
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -71,7 +81,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: LOCALE_INIT_SCRIPT }}
         />
-        <meta name="theme-color" content="#18181B" />
+        <meta name="theme-color" content="#060A14" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta
           name="apple-mobile-web-app-status-bar-style"
@@ -180,10 +190,27 @@ export default function Root() {
   // The path, not the visitor, picks the shell, so the SSR shell stays one
   // cached page per URL.
   const { pathname } = useLocation();
+  // The landing page is public and server rendered on its own, without the
+  // signed-in workspace chrome (sync, command menu, sidebars).
+  if (pathname === "/") {
+    return (
+      <AppToolkitProvider>
+        <AppProviders
+          queryClient={queryClient}
+          defaultTheme="dark"
+          isPublicPath
+          i18n={{ catalog: i18nCatalog }}
+        >
+          <Outlet />
+        </AppProviders>
+      </AppToolkitProvider>
+    );
+  }
   return (
     <AppToolkitProvider>
       <AppProviders
         queryClient={queryClient}
+        defaultTheme="dark"
         skeletonLayout={skeletonLayoutForPath(pathname)}
         i18n={{ catalog: i18nCatalog }}
       >

@@ -18,13 +18,17 @@ export interface NavigationState {
   path?: string;
   publicPath?: string;
   threadId?: string;
+  /** Twins: the open map and the selected set of copies. */
+  repoId?: string;
+  setId?: string;
 }
 
 export function useNavigationState() {
   useAgentRouteState<NavigationState>({
     browserTabId: TAB_ID,
     requestSource: TAB_ID,
-    getNavigationState: ({ pathname }) => navigationStateForPath(pathname),
+    getNavigationState: ({ pathname, searchParams }) =>
+      navigationStateForPath(pathname, searchParams),
     getCommandPath: commandPathForNavigation,
   });
 }
@@ -62,18 +66,38 @@ function matchesPathPrefix(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
 }
 
-export function navigationStateForPath(pathname: string): NavigationState {
+export function navigationStateForPath(
+  pathname: string,
+  searchParams?: URLSearchParams,
+): NavigationState {
   const threadId = threadIdFromPath(pathname);
+  const repoId = repoIdFromPath(pathname);
+  const setId = repoId ? searchParams?.get("set") : null;
   return {
     view: viewForPath(pathname),
     path: pathname,
     publicPath: appPathFromLocalRoute(pathname),
     ...(threadId ? { threadId } : {}),
+    ...(repoId ? { repoId } : {}),
+    ...(setId ? { setId } : {}),
   };
+}
+
+function repoIdFromPath(pathname: string): string | null {
+  const encoded = pathname.match(/^\/map\/([^/]+)/)?.[1];
+  if (!encoded) return null;
+  try {
+    return decodeURIComponent(encoded);
+  } catch {
+    return null;
+  }
 }
 
 function viewForPath(pathname: string): string {
   if (isChatPathname(pathname)) return "chat";
+  if (pathname === "/") return "landing";
+  if (pathname === "/map") return "new-map";
+  if (pathname.startsWith("/map/")) return "map";
   if (pathname === HOME_PATH) return "home";
   if (pathname.startsWith("/database")) return "database";
   if (pathname.startsWith("/extensions")) return "extensions";
@@ -93,6 +117,11 @@ function pathForView(view?: string): string {
       return NEW_CHAT_PATH;
     case "home":
       return HOME_PATH;
+    case "new-map":
+    case "map":
+      return "/map";
+    case "landing":
+      return "/";
     case "database":
       return "/database";
     case "extensions":
@@ -111,6 +140,12 @@ function pathForView(view?: string): string {
 }
 
 export function pathForCommand(command: any): string {
+  if (command?.view === "map" && typeof command?.repoId === "string") {
+    const base = `/map/${encodeURIComponent(command.repoId)}`;
+    return typeof command?.setId === "string" && command.setId
+      ? `${base}?set=${encodeURIComponent(command.setId)}`
+      : base;
+  }
   const path = pathForView(command?.view);
   if (command?.view !== "chat" && command?.view !== "ask") return path;
   const threadId =

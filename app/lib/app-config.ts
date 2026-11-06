@@ -1,5 +1,5 @@
 const rawAppName = "twins-app";
-const rawAppTitle = "Twins App";
+const rawAppTitle = "Twins";
 
 const APP_NAME_PLACEHOLDER = "{" + "{APP_NAME}}";
 const APP_TITLE_PLACEHOLDER = "{" + "{APP_TITLE}}";
