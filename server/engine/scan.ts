@@ -497,6 +497,18 @@ function localHashOf(ctx: FileCtx, name: string, visiting: Set<string>): string 
   return h;
 }
 
+/** The nearest folder at or above the file's folder that has a package.json ("" for the repo root or none). */
+export function packageRoot(dir: string, rel: string): string {
+  let d = path.posix.dirname(rel);
+  while (d && d !== ".") {
+    if (fs.existsSync(path.join(dir, d, "package.json"))) return d;
+    const up = path.posix.dirname(d);
+    if (up === d) break;
+    d = up;
+  }
+  return "";
+}
+
 export function scanRepo(dir: string): ScanResult {
   const t0 = Date.now();
   if (!fs.existsSync(dir)) throw new EngineError("repo_missing", `Repo folder not found: ${dir}`);
@@ -676,7 +688,9 @@ export function scanRepo(dir: string): ScanResult {
     if (kind === "near") reason = "The copies differ, so a shared version has to be written by hand or by the agent.";
     else if (members.some((m) => m.isDefault)) reason = "One copy is a default export.";
     else if (new Set(members.map((m) => m.path)).size < members.length) reason = "Two copies live in the same file.";
-    else if (group.some((c) => c.assigned)) {
+    else if (new Set(members.map((m) => packageRoot(dir, m.path))).size > 1) {
+      reason = "The copies live in separate packages, so one shared file would sit outside both of them.";
+    } else if (group.some((c) => c.assigned)) {
       reason = "A copy gets properties set on it after it is declared (like displayName), so one shared function would change behaviour.";
     }
     const set: TwinSet = {

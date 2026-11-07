@@ -309,3 +309,40 @@ describe("merge helpers", () => {
     expect(lineDiff("a\nb\nc", "a\nB\nc\nd")).toEqual({ removed: 1, added: 2 });
   });
 });
+
+describe("packages and Node ESM imports", () => {
+  const body = `export function clampValue(n: number, lo: number, hi: number): number {
+  if (n < lo) return lo;
+  if (n > hi) return hi;
+  const mid = (lo + hi) / 2;
+  return Number.isFinite(n) ? n : mid;
+}
+`;
+
+  it("does not offer a one click merge across separate packages", () => {
+    const dir = makeRepo({
+      "packages/a/package.json": "{}",
+      "packages/a/src/x.ts": body,
+      "packages/b/package.json": "{}",
+      "packages/b/src/y.ts": body,
+    });
+    const set = scanRepo(dir).sets.find((s) => s.name === "clampValue")!;
+    expect(set.mergeable).toBe(false);
+    expect(set.reason).toMatch(/separate packages/);
+  });
+
+  it("adds .js to the new import when the package resolves modules the NodeNext way", () => {
+    const dir = makeRepo({
+      "pkg/package.json": "{}",
+      "pkg/tsconfig.json": `{ "compilerOptions": { "module": "NodeNext", "moduleResolution": "NodeNext" } }`,
+      "pkg/src/one/x.ts": body,
+      "pkg/src/two/y.ts": body,
+    });
+    const set = scanRepo(dir).sets.find((s) => s.name === "clampValue")!;
+    expect(set.mergeable).toBe(true);
+    const plan = planMerge(dir, set);
+    for (const e of plan.edits.filter((e) => e.before !== null)) {
+      expect(e.after).toMatch(/from ["']\.\.\/clamp-value\.js["']/);
+    }
+  });
+});

@@ -196,7 +196,26 @@ function findDecl(sf: SourceFile, m: Member): { node: Node; statement: Statement
   );
 }
 
-function fileStyle(sf: SourceFile): { quote: string; semi: string; ext: "js" | "ts" | "" } {
+/** True when the nearest tsconfig.json above the file resolves modules the Node ESM way (extensions required). */
+function needsJsExtension(dir: string, rel: string): boolean {
+  let d = path.posix.dirname(rel);
+  for (;;) {
+    const cfgPath = path.join(dir, d === "." ? "" : d, "tsconfig.json");
+    if (fs.existsSync(cfgPath)) {
+      try {
+        const parsed = ts.parseConfigFileTextToJson(cfgPath, fs.readFileSync(cfgPath, "utf8"));
+        const o = (parsed.config?.compilerOptions ?? {}) as { module?: string; moduleResolution?: string };
+        return /^node(16|18|20|next)$/i.test(o.moduleResolution ?? o.module ?? "");
+      } catch {
+        return false;
+      }
+    }
+    if (d === "." || d === "") return false;
+    d = path.posix.dirname(d);
+  }
+}
+
+function fileStyle(sf: SourceFile, dir?: string, rel?: string): { quote: string; semi: string; ext: "js" | "ts" | "" } {
   const imports = sf.getImportDeclarations();
   const first = imports[0];
   const quote = first ? (first.getModuleSpecifier().getText()[0] ?? '"') : '"';
@@ -208,6 +227,8 @@ function fileStyle(sf: SourceFile): { quote: string; semi: string; ext: "js" | "
     if (/\.(m|c)?js$/.test(spec)) ext = "js";
     else if (/\.tsx?$/.test(spec) && ext === "") ext = "ts";
   }
+  const hasRelative = imports.some((d) => d.getModuleSpecifierValue().startsWith("."));
+  if (!hasRelative && dir && rel && needsJsExtension(dir, rel)) ext = "js";
   return { quote, semi, ext };
 }
 
@@ -387,7 +408,7 @@ export function planMerge(
   const edits: FileEdit[] = [];
   for (const m of members) {
     const sf = files.get(m.path)!;
-    const style = fileStyle(sf);
+    const style = fileStyle(sf, dir, m.path);
     const { node, statement } = findDecl(sf, m);
     const exportKw = exportModifierKinds(statement);
     const removedNames = new Set(refs(node));
