@@ -26,12 +26,42 @@ function readConfig(file: string): any | null {
 /**
  * Configs to type check: `["tsconfig.json"]`, or the referenced configs when the
  * root config is a solution file (has `references` and `files: []`).
- * Returns `[]` when the repo has no tsconfig.json.
+ * With no root tsconfig.json, the nested package configs; `[]` when there are none.
  */
+const SKIP_DIRS = new Set(["node_modules", "dist", "build", "out", "coverage", "vendor"]);
+
+/**
+ * Package configs in a repo with no root tsconfig.json (a monorepo of separate
+ * packages): every nested tsconfig.json up to four folders deep, outermost first,
+ * skipping folders already covered by an outer config.
+ */
+export function nestedTargets(dir: string, maxDepth = 4, limit = 12): string[] {
+  const found: string[] = [];
+  const walk = (rel: string, depth: number) => {
+    if (depth > maxDepth || found.length >= limit) return;
+    let entries: fs.Dirent[];
+    try {
+      entries = fs.readdirSync(path.join(dir, rel), { withFileTypes: true });
+    } catch {
+      return;
+    }
+    if (rel && entries.some((e) => e.isFile() && e.name === "tsconfig.json")) {
+      found.push(path.posix.join(rel, "tsconfig.json"));
+      return;
+    }
+    for (const e of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+      if (!e.isDirectory() || e.name.startsWith(".") || SKIP_DIRS.has(e.name)) continue;
+      walk(rel ? `${rel}/${e.name}` : e.name, depth + 1);
+    }
+  };
+  walk("", 0);
+  return found;
+}
+
 export function checkTargets(dir: string): string[] {
   const root = readConfig(path.join(dir, "tsconfig.json"));
   if (!root || typeof root !== "object") {
-    return fs.existsSync(path.join(dir, "tsconfig.json")) ? ["tsconfig.json"] : [];
+    return fs.existsSync(path.join(dir, "tsconfig.json")) ? ["tsconfig.json"] : nestedTargets(dir);
   }
   const refs: unknown[] = Array.isArray(root.references) ? root.references : [];
   const solution = refs.length > 0 && Array.isArray(root.files) && root.files.length === 0 && !root.include;

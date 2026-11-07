@@ -1,9 +1,15 @@
 // Vercel Sandbox session: repo code only ever installs, type checks and builds in here.
+import path from "node:path";
 import { Sandbox } from "@vercel/sandbox";
 import { EngineError } from "./errors.js";
 import { parseTsgo, type CheckResult, type Diag } from "./check.js";
 
 const TSGO = "/tmp/checker/node_modules/.bin/tsgo";
+
+/** Single quote a path for bash: repo folder names must never expand. */
+function shq(s: string): string {
+  return `'${s.replace(/'/g, `'\''`)}'`;
+}
 const SANDBOX_TIMEOUT_MS = 45 * 60 * 1000;
 
 function credentials():
@@ -99,10 +105,34 @@ export async function prepareSandbox(
   const sbx = await getSandbox(sandboxId);
   let checkerDone = false;
   onStage("installing dependencies");
+  // One install at the root, or one per package when the repo has no root
+  // package.json (separate packages side by side, each with its own lockfile).
+  const pkgDirs = [
+    ...new Set(
+      targets
+        .map((t) => path.posix.dirname(t))
+        .filter((d) => d !== "." && !d.startsWith("..")),
+    ),
+  ];
   const installRepo = async () => {
-    const r = await sh(
+    const rootPkg = (await sh(sbx, "[ -f package.json ] && echo yes || echo no")).out.trim() === "yes";
+    const dirs = rootPkg || pkgDirs.length === 0 ? ["."] : pkgDirs;
+    const results = await Promise.all(dirs.map((d) => installIn(d)));
+    const bad = results.find((r) => r.code !== 0);
+    if (bad && (rootPkg || results.every((r) => r.code !== 0))) {
+      throw new EngineError(
+        "install_failed",
+        "The repo's dependencies would not install in the sandbox.",
+        { tail: (bad.err || bad.out).slice(-600) },
+      );
+    }
+  };
+  const installIn = (d: string) =>
+    sh(
       sbx,
-      `if [ -d node_modules/.bin ]; then exit 0; fi
+      `cd ${shq(d)} || exit 0
+if [ ! -f package.json ]; then exit 0; fi
+if [ -d node_modules/.bin ]; then exit 0; fi
 if [ -f package-lock.json ] || { [ ! -f pnpm-lock.yaml ] && [ ! -f yarn.lock ]; }; then
   npm install --ignore-scripts --no-audit --no-fund --legacy-peer-deps --loglevel=error
 elif [ -f pnpm-lock.yaml ]; then
@@ -112,14 +142,6 @@ else
 fi`,
       { timeoutMs: 8 * 60 * 1000 },
     );
-    if (r.code !== 0) {
-      throw new EngineError(
-        "install_failed",
-        "The repo's dependencies would not install in the sandbox.",
-        { tail: (r.err || r.out).slice(-600) },
-      );
-    }
-  };
   const installChecker = async () => {
     const r = await sh(
       sbx,
@@ -194,7 +216,7 @@ export async function runCheck(
     targets.map(async (cfg) => {
       const r = await sh(
         sbx,
-        `${TSGO} --noEmit --pretty false --listFiles -p ${JSON.stringify(cfg)}`,
+        `${TSGO} --noEmit --pretty false --listFiles -p ${shq(cfg)}`,
         { timeoutMs: 240_000 },
       );
       if (r.code !== 0 && r.code !== 2 && !r.out.trim()) {

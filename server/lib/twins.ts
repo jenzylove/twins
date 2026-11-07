@@ -371,7 +371,10 @@ async function doPrepare(row: RepoRow): Promise<void> {
       ? (JSON.parse(row.baselineJson) as Baseline)
       : null;
     let baseline: Baseline;
-    if (priorBaseline) {
+    if (
+      priorBaseline &&
+      JSON.stringify(priorBaseline.targets) === JSON.stringify(targets)
+    ) {
       baseline = priorBaseline; // keep the original baseline when recreating
     } else {
       const cov = calcCoverage(

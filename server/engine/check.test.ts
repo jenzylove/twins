@@ -124,6 +124,26 @@ describe("checkTargets", () => {
     expect(checkTargets(plain)).toEqual(["tsconfig.json"]);
     expect(checkTargets(makeRepo({ "a.js": "" }))).toEqual([]);
   });
+
+  it("finds package configs in a monorepo with no root tsconfig", () => {
+    const dir = makeRepo({
+      "app/tsconfig.json": "{}",
+      "app/src/inner/tsconfig.json": "{}",
+      "packages/core/tsconfig.json": "{}",
+      "packages/keeper/tsconfig.json": "{}",
+      "agent/a/b/c/tsconfig.json": "{}",
+      "agent/a/b/c/d/e/tsconfig.json": "{}",
+      "node_modules/x/tsconfig.json": "{}",
+      ".github/tsconfig.json": "{}",
+      "relay/index.js": "",
+    });
+    expect(checkTargets(dir)).toEqual([
+      "agent/a/b/c/tsconfig.json",
+      "app/tsconfig.json",
+      "packages/core/tsconfig.json",
+      "packages/keeper/tsconfig.json",
+    ]);
+  });
 });
 
 describe("coverage", () => {
