@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { ts } from "ts-morph";
+import { ts } from "./ts-morph.js";
 
 export type Diag = { file: string; line: number; col: number; code: string; message: string };
 export type CheckResult = {

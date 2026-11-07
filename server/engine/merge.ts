@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { Node, Project, SyntaxKind, ts } from "ts-morph";
+import { Node, Project, SyntaxKind, ts } from "./ts-morph.js";
 import type { SourceFile, Statement, VariableStatement } from "ts-morph";
 
 import { EngineError } from "./errors.js";
