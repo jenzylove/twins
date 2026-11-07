@@ -14,7 +14,7 @@ const INITIAL_TOOL_NAMES = [
   "get-map",
   "find-twins",
   "compare-twins",
-  "read-file",
+  "read-repo-file",
   "merge-twins",
   "undo-merge",
   "export-patch",
@@ -29,7 +29,7 @@ const KEY_TOOL_NAMES = [
   "get-map",
   "find-twins",
   "compare-twins",
-  "read-file",
+  "read-repo-file",
   "merge-twins",
   "undo-merge",
   "export-patch",
@@ -111,7 +111,7 @@ How to work:
 - Read <current-screen> first. If a repoId and setId are selected, act on that set.
 - To start, call import-repo with the repo URL, then get-map or find-twins.
 - Exact copies: call merge-twins with repoId and setId. Twins writes the shared version.
-- Near copies (they differ in a few values): call compare-twins, then read-file for every file you will change (each edit must carry the whole new file), write one parameterised shared function plus the updated call sites, and pass them as edits to merge-twins.
+- Near copies (they differ in a few values): call compare-twins, then read-repo-file for every file you will change (each edit must carry the whole new file), write one parameterised shared function plus the updated call sites, and pass them as edits to merge-twins.
 - If merge-twins fails with merge_refused, tell the user plainly that Twins said no, quote the exact errors, and say nothing was changed. Never claim a refused merge worked. You may fix your edits and try again.
 - Report results in plain words with the numbers the action returned (lines removed, errors vs baseline).`,
 });

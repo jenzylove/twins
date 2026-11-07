@@ -67,7 +67,7 @@ importers:
         version: 0.1.32(@agent-native/core@0.224.0(d431e6face125baf0e5f71bbf7e9f5df))
       '@agent-native/toolkit':
         specifier: 0.224.0
-        version: 0.224.0(b19ec12663d8df962aff01bb675ddb41)
+        version: 0.224.0(3c9d666b53413ffe03bd532f447e1d15)
       '@ai-sdk/anthropic':
         specifier: ^3.0.71
         version: 3.0.138(zod@4.6.7)
@@ -149,6 +149,9 @@ importers:
       ts-morph:
         specifier: ^24.0.0
         version: 24.0.0
+      undici:
+        specifier: ^8.12.4
+        version: 8.12.4
       use-sync-external-store:
         specifier: ^1.6.0
         version: 1.7.0(react@19.3.1)
@@ -5307,6 +5310,10 @@ packages:
     resolution: {integrity: sha512-mLyPQnHwUxaM/rideoK/+KL8DaAJLRl4aBCfmX444aCSLnIaomqPLtNRe2jdCYcsk5wZzXrDIQC8ZeYNRAYyIA==}
     engines: {node: '>=20.18.1'}
 
+  undici@8.12.4:
+    resolution: {integrity: sha512-8Mx+uNKKER2bA4AdtedkqRbwUCIJFr2nJckXRe5yrDqzePqwLP7VNcctN8/XdmDSbF7mS+jJKIszlL+vbam1VA==}
+    engines: {node: '>=22.19.0'}
+
   unenv@2.0.0-rc.24:
     resolution: {integrity: sha512-i7qRCmY42zmCwnYlh9H2SvLEypEFGye5iRmEMKjcGi7zk9UquigRjFtTLz0TYqr0ZGLZhaMHl/foy1bZR+Cwlw==}
 
@@ -5798,7 +5805,7 @@ snapshots:
 
   '@agent-native/recap-cli@0.5.96': {}
 
-  '@agent-native/toolkit@0.224.0(b19ec12663d8df962aff01bb675ddb41)':
+  '@agent-native/toolkit@0.224.0(3c9d666b53413ffe03bd532f447e1d15)':
     dependencies:
       '@agent-native/agentkit': 0.224.0
       '@assistant-ui/react': 0.12.28(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(ai@6.0.258(zod@4.6.7))(immer@11.2.9)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1))
@@ -5873,7 +5880,7 @@ snapshots:
       linkedom: 0.18.15
       lowlight: 3.3.0
       next-themes: 0.4.6(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      openai: 7.52.0(undici@7.30.2)(ws@8.22.1)(zod@4.6.7)
+      openai: 7.52.0(undici@8.12.4)(ws@8.22.1)(zod@4.6.7)
       qrcode.react: 4.2.0(react@19.3.1)
       react: 19.3.1
       react-day-picker: 10.0.2(@types/react@19.3.0)(react@19.3.1)
@@ -9927,9 +9934,9 @@ snapshots:
       regex: 6.1.0
       regex-recursion: 6.0.2
 
-  openai@7.52.0(undici@7.30.2)(ws@8.22.1)(zod@4.6.7):
+  openai@7.52.0(undici@8.12.4)(ws@8.22.1)(zod@4.6.7):
     optionalDependencies:
-      undici: 7.30.2
+      undici: 8.12.4
       ws: 8.22.1
       zod: 4.6.7
 
@@ -10731,6 +10738,8 @@ snapshots:
   undici@6.29.1: {}
 
   undici@7.30.2: {}
+
+  undici@8.12.4: {}
 
   unenv@2.0.0-rc.24:
     dependencies:

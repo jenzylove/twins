@@ -36,7 +36,7 @@ const MIN_COVERAGE = 0.6;
 
 export default defineAction({
   description:
-    "Merge a set of duplicate copies into one shared file, but only if the type check does not get worse. Without edits it plans the merge deterministically (exact copies). With edits (an agent-written merge for near copies: see compare-twins, and read-file for the whole current text of each file you change) it applies them as given. Either way the edits are written to the sandbox and re-checked; if the merge adds any type error, or breaks a passing build, it is reverted, recorded as refused, and the action fails with merge_refused and the added errors. Nothing changes on a refusal.",
+    "Merge a set of duplicate copies into one shared file, but only if the type check does not get worse. Without edits it plans the merge deterministically (exact copies). With edits (an agent-written merge for near copies: see compare-twins, and read-repo-file for the whole current text of each file you change) it applies them as given. Either way the edits are written to the sandbox and re-checked; if the merge adds any type error, or breaks a passing build, it is reverted, recorded as refused, and the action fails with merge_refused and the added errors. Nothing changes on a refusal.",
   schema: z.object({
     repoId: z.string().describe("Repo id returned by import-repo"),
     setId: z.string().describe("Copy set id from find-twins"),
@@ -190,7 +190,7 @@ export default defineAction({
         mode = "auto";
         if (!set.mergeable) {
           bail(
-            `This set cannot merge automatically: ${set.reason ?? "its copies differ"}. Use compare-twins, read-file for each file you change, and pass edits.`,
+            `This set cannot merge automatically: ${set.reason ?? "its copies differ"}. Use compare-twins, read-repo-file for each file you change, and pass edits.`,
             "not_mergeable",
             { statusCode: 422 },
           );
