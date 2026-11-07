@@ -15,6 +15,7 @@ import { runCheck, writeFiles } from "../server/engine/sandbox.js";
 import {
   applyToDisk,
   callerOf,
+  cleanDiagMessage,
   countLines,
   engine,
   ensureReady,
@@ -29,6 +30,7 @@ import {
   withRepoLock,
   bail,
 } from "../server/lib/twins.js";
+import { mapEmbed } from "../server/lib/map-embed.js";
 
 const MIN_COVERAGE = 0.6;
 
@@ -80,6 +82,10 @@ export default defineAction({
     baselineErrors: z.number(),
     errorsFixed: z.number(),
     summary: z.string(),
+    message: z
+      .string()
+      .describe("One line for the user: what was kept and the numbers"),
+    duplicateLinesBefore: z.number(),
     duplicateLinesNow: z.number(),
     nextRequiredAction: z.string(),
   }),
@@ -90,6 +96,12 @@ export default defineAction({
     openWorldHint: true,
   },
   errors: twinsErrors,
+  // Inline map card in MCP Apps hosts, "Open the map" link everywhere else.
+  ...mapEmbed<{ repoId: string }, { mergeId?: string } | undefined>({
+    title: "Twins merge result",
+    openLabel: "Open the map in Twins",
+    mergeId: ({ result }) => result?.mergeId,
+  }),
   run: async (args, ctx) => {
     const repo0 = await loadRepo(ctx, args.repoId);
     return withRepoLock(repo0.id, async () => {
@@ -208,18 +220,29 @@ export default defineAction({
         );
         throw err;
       }
-      const { added, fixed } = compareDiags(baseline.diags, after.diags);
+      const compared = compareDiags(baseline.diags, after.diags);
+      const fixed = compared.fixed;
+      const added = compared.added.map((d) => ({
+        ...d,
+        message: cleanDiagMessage(d.message),
+      }));
       const buildBroke = withBuild && !!after.build?.ran && !after.build.ok;
       const mergeId = crypto.randomUUID();
 
       // 3. Refuse: restore, record the row, then fail.
       if (added.length > 0 || buildBroke) {
         await writeFiles(sandboxId, plan.edits.map(restore));
-        const first = added.slice(0, 3).map(formatDiag).join("; ").replace(/\.$/, "");
+        const shown = 5;
+        const listed = added
+          .slice(0, shown)
+          .map((d) => formatDiag(d).replace(/\.$/, ""))
+          .join("; ");
+        const more =
+          added.length > shown ? ` (and ${added.length - shown} more)` : "";
         const message =
           added.length === 0
             ? "Twins said no: this merge breaks the build, which passed before. Nothing was changed."
-            : `Twins said no: this merge adds ${added.length} type error${added.length === 1 ? "" : "s"}. ${first}. Nothing was changed.`;
+            : `Twins said no: this merge adds ${added.length} type error${added.length === 1 ? "" : "s"} the baseline does not have: ${listed}${more}. Nothing was changed.`;
         await getDb()
           .insert(schema.merges)
           .values({
@@ -260,6 +283,11 @@ export default defineAction({
       // 4. Keep: workdir, rescan, record.
       applyToDisk(dir, plan.edits.map(toContent));
       const next = await rescan(row, dir);
+      const before = scan.totals.duplicateLines;
+      const now = next.totals.duplicateLines;
+      const errorsNow = after.diags.length;
+      const errorsBase = baseline.diags.length;
+      const message = `Kept: merged ${set.name} into ${plan.sharedPath}. ${plan.linesRemoved} lines removed, ${plan.linesAdded} added; duplicate lines ${before} to ${now}; type check ${errorsNow} errors vs ${errorsBase} at baseline${fixed > 0 ? ` (${fixed} fixed)` : ""}; checked in ${(after.ms / 1000).toFixed(1)}s.`;
       const summary = `Merged ${set.name} into ${plan.sharedPath}: ${plan.linesRemoved} lines removed, ${plan.linesAdded} added, type check ${after.diags.length} errors (baseline ${baseline.diags.length}).`;
       await getDb()
         .insert(schema.merges)
@@ -295,7 +323,9 @@ export default defineAction({
         baselineErrors: baseline.diags.length,
         errorsFixed: fixed,
         summary,
-        duplicateLinesNow: next.totals.duplicateLines,
+        message,
+        duplicateLinesBefore: before,
+        duplicateLinesNow: now,
         nextRequiredAction: "find-twins",
       };
     });

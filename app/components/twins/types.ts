@@ -59,7 +59,13 @@ export type MapStatus = "scanning" | "preparing" | "ready" | "failed";
 export type MapData = {
   status: MapStatus;
   statusDetail: string | null;
-  repo: { owner: string; name: string; htmlUrl: string; sha: string };
+  repo: {
+    owner: string;
+    name: string;
+    htmlUrl: string;
+    sha: string;
+    prUrl?: string | null | undefined;
+  };
   files: FileNode[];
   sets: TwinSet[];
   baseline: {

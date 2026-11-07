@@ -1,5 +1,6 @@
 import { defineAction } from "@agent-native/core/action";
 import { z } from "zod";
+import { mapEmbed } from "../server/lib/map-embed.js";
 import { loadRepo, parseScan, twinsErrors } from "../server/lib/twins.js";
 
 const memberSchema = z.object({
@@ -50,6 +51,10 @@ export default defineAction({
   http: { method: "GET" },
   mcpTool: true,
   errors: twinsErrors,
+  ...mapEmbed<{ repoId: string }>({
+    title: "Twins copies map",
+    openLabel: "Open the map in Twins",
+  }),
   run: async (args, ctx) => {
     const row = await loadRepo(ctx, args.repoId);
     const scan = parseScan(row);

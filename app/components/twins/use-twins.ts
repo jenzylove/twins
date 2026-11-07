@@ -32,7 +32,14 @@ export type MergeOutcome =
 // get-map returns sets with a member count; find-twins carries the members.
 
 type RawMap = {
-  repo: { id?: string; owner: string; name: string; sha: string; htmlUrl: string };
+  repo: {
+    id?: string;
+    owner: string;
+    name: string;
+    sha: string;
+    htmlUrl: string;
+    prUrl?: string | null;
+  };
   status: string;
   statusDetail: string | null;
   files: MapData["files"];
@@ -100,9 +107,11 @@ export function useTwinsMap(repoId: string) {
       refetchInterval: (q) => {
         const data = q.state.data as RawMap | undefined;
         if (!data) return false;
-        return data.status === "ready" || data.status === "failed"
-          ? 5000
-          : 1200;
+        // Ready maps poll fast so a merge from any caller (Claude Code over
+        // MCP included) flashes KEPT or SAID NO within about two seconds,
+        // even on serverless hosts without a sync stream. Paused when hidden.
+        if (data.status === "ready") return 2000;
+        return data.status === "failed" ? 5000 : 1200;
       },
     },
   );
@@ -203,5 +212,38 @@ export function useTwinsActions(repoId: string) {
     [repoId],
   );
 
-  return { runMerge, runUndo, runExport, undoPending: undo.isPending };
+  const runOpenPr = useCallback(
+    async () => {
+      try {
+        return (await callAction("open-pull-request", { repoId })) as {
+          url: string;
+          number?: number;
+        };
+      } finally {
+        void refresh();
+      }
+    },
+    [refresh, repoId],
+  );
+
+  return { runMerge, runUndo, runExport, runOpenPr, undoPending: undo.isPending };
+}
+
+/** Link GitHub (with permission to open pull requests) to the signed-in account. */
+export async function connectGithub(): Promise<void> {
+  const res = await fetch("/api/auth/link-social", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      provider: "github",
+      scopes: ["public_repo"],
+      callbackURL: window.location.href,
+    }),
+  });
+  const json = (await res.json().catch(() => null)) as { url?: string; message?: string } | null;
+  if (!res.ok || !json?.url) {
+    throw new Error(json?.message ?? "Could not start the GitHub connection.");
+  }
+  window.location.href = json.url;
 }

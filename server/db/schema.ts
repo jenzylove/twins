@@ -21,6 +21,8 @@ export const repos = pgTable("repos", {
   scanJson: text("scan_json"),
   baselineJson: text("baseline_json"),
   hasBuild: boolean("has_build").notNull().default(false),
+  prUrl: text("pr_url"),
+  prNumber: integer("pr_number"),
   createdAt: text("created_at")
     .notNull()
     .default(sql`now()`),

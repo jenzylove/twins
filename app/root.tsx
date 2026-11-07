@@ -102,12 +102,26 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+// External agents (Claude Code over MCP, the in-app agent) merge while a map
+// is open, and the map must show KEPT or SAID NO without a reload.
+function isLiveMapPath(pathname: string) {
+  return pathname.startsWith("/map/") || pathname.startsWith("/embed/map/");
+}
+
 function DbSyncSetup() {
   const qc = useQueryClient();
+  const { pathname } = useLocation();
   useNavigationState();
   useDbSync({
     queryClient: qc,
     ignoreSource: TAB_ID,
+    ...(isLiveMapPath(pathname)
+      ? {
+          realtime: {
+            reason: "external agents can merge or get refused while this map is open",
+          },
+        }
+      : {}),
   });
   return null;
 }
@@ -201,6 +215,24 @@ export default function Root() {
           isPublicPath
           i18n={{ catalog: i18nCatalog }}
         >
+          <Outlet />
+        </AppProviders>
+      </AppToolkitProvider>
+    );
+  }
+  // MCP App cards (/embed/...): the signed route renders inside a chat host's
+  // frame, so it gets the session and live sync but no app chrome.
+  if (pathname.startsWith("/embed/")) {
+    return (
+      <AppToolkitProvider>
+        <AppProviders
+          queryClient={queryClient}
+          defaultTheme="dark"
+          skipFirstRunOnboarding
+          showEnvironmentBadge={false}
+          i18n={{ catalog: i18nCatalog }}
+        >
+          <DbSyncSetup />
           <Outlet />
         </AppProviders>
       </AppToolkitProvider>

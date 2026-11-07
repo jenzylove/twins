@@ -52,6 +52,10 @@ export const twinsErrors = defineActionErrors(
   "merge_refused",
   "undo_blocked",
   "undo_unverified",
+  "github_not_connected",
+  "nothing_to_merge",
+  "upstream_confirmation_required",
+  "github_error",
 );
 
 type ErrCode = (typeof twinsErrors.codes)[number];
@@ -478,8 +482,20 @@ export async function ensureReady(
   return { row: cur, dir };
 }
 
+/**
+ * tsgo repeats the head line of some messages as its first chain line. Drop
+ * repeated lines for display only; comparisons keep the raw message.
+ */
+export function cleanDiagMessage(message: string): string {
+  const out: string[] = [];
+  for (const line of message.split("\n")) {
+    if (out[out.length - 1] !== line) out.push(line);
+  }
+  return out.join("\n");
+}
+
 export function formatDiag(d: Diag): string {
-  return `${d.file}:${d.line} ${d.message}`;
+  return `${d.file}:${d.line} ${d.code} ${cleanDiagMessage(d.message).replace(/\n/g, " ")}`;
 }
 
 // ---- shared output shapes ----------------------------------------------------

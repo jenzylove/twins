@@ -1,5 +1,5 @@
 import { sendToAgentChat } from "@agent-native/core/client/agent-chat";
-import { writeClientAppState } from "@agent-native/core/client/hooks";
+import { actionErrorCode, writeClientAppState } from "@agent-native/core/client/hooks";
 import { AgentToggleButton } from "@agent-native/toolkit/app/chat";
 import {
   IconArrowBackUp,
@@ -19,6 +19,7 @@ import { TAB_ID } from "@/lib/tab-id";
 import { AnimatedNumber, callerLabel, formatNumber, timeAgo } from "./bits";
 import { BlueprintMap, type MapEvent } from "./BlueprintMap";
 import {
+  connectGithub,
   errorMessage,
   useCompare,
   useTwinsActions,
@@ -700,8 +701,37 @@ function Timeline({
   repoId: string;
   knownSets: Map<string, TwinSet>;
 }) {
-  const { runUndo, runExport, undoPending } = useTwinsActions(repoId);
+  const { runUndo, runExport, runOpenPr, undoPending } = useTwinsActions(repoId);
   const [exporting, setExporting] = useState(false);
+  const [opening, setOpening] = useState(false);
+  const [needsGithub, setNeedsGithub] = useState(false);
+  const [prUrl, setPrUrl] = useState<string | null>(null);
+
+  async function openPr() {
+    setOpening(true);
+    try {
+      const r = await runOpenPr();
+      setPrUrl(r.url);
+      toast.success("Pull request opened.");
+    } catch (e) {
+      if (actionErrorCode(e) === "github_not_connected") {
+        setNeedsGithub(true);
+        toast("Connect GitHub first, then press Open pull request again.");
+      } else {
+        toast.error(errorMessage(e));
+      }
+    } finally {
+      setOpening(false);
+    }
+  }
+
+  async function linkGithub() {
+    try {
+      await connectGithub();
+    } catch (e) {
+      toast.error(errorMessage(e));
+    }
+  }
   const kept = data.merges.filter((m) => m.status === "kept").length;
 
   async function exportPatch() {
@@ -765,18 +795,38 @@ function Timeline({
           <IconDownload className="size-4" strokeWidth={1.8} />
           {exporting ? "Preparingâ€¦" : "Export patch"}
         </button>
-        <button
-          type="button"
-          disabled
-          className="tw-btn tw-btn-ghost h-9"
-          title="Opening pull requests is coming next"
-        >
-          <IconExternalLink className="size-4" strokeWidth={1.8} />
-          Open pull request
-          <span className="tw-mono rounded-sm bg-[rgba(143,216,255,0.1)] px-1 text-[9px] tracking-widest text-[var(--cyan)]">
-            SOON
-          </span>
-        </button>
+        {data.repo.prUrl || prUrl ? (
+          <a
+            href={(prUrl ?? data.repo.prUrl) as string}
+            target="_blank"
+            rel="noreferrer"
+            className="tw-btn tw-btn-ghost h-9"
+          >
+            <IconExternalLink className="size-4" strokeWidth={1.8} />
+            View pull request
+          </a>
+        ) : needsGithub ? (
+          <button
+            type="button"
+            onClick={() => void linkGithub()}
+            className="tw-btn tw-btn-ghost h-9"
+            title="Approve public repo access so Twins can open the pull request from your account"
+          >
+            <IconBrandGithub className="size-4" strokeWidth={1.8} />
+            Connect GitHub
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => void openPr()}
+            disabled={opening || kept === 0}
+            className="tw-btn tw-btn-ghost h-9"
+            title="Fork the repo to your GitHub and open a pull request with the kept merges"
+          >
+            <IconExternalLink className="size-4" strokeWidth={1.8} />
+            {opening ? "Opening pull request…" : "Open pull request"}
+          </button>
+        )}
       </div>
     </div>
   );

@@ -51,6 +51,13 @@ CREATE INDEX IF NOT EXISTS merges_owner_idx ON merges (owner_email)`,
       // Additive. Old rows keep '' and get their name derived from summary on read.
       sql: `ALTER TABLE merges ADD COLUMN IF NOT EXISTS set_name TEXT NOT NULL DEFAULT ''`,
     },
+    {
+      version: 3,
+      name: "repos-pull-request",
+      // Additive. Where the pull request opened from this repo's kept merges lives.
+      sql: `ALTER TABLE repos ADD COLUMN IF NOT EXISTS pr_url TEXT;
+ALTER TABLE repos ADD COLUMN IF NOT EXISTS pr_number INTEGER`,
+    },
   ],
   { table: "twins_app_migrations" },
 );
