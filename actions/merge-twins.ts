@@ -14,7 +14,7 @@ import {
 import { runCheck, writeFiles } from "../server/engine/sandbox.js";
 import {
   applyToDisk,
-  callerOf,
+  callerLabel,
   cleanDiagMessage,
   countLines,
   engine,
@@ -253,7 +253,7 @@ export default defineAction({
             setId: set.id,
             status: "refused",
             mode,
-            caller: callerOf(ctx),
+            caller: await callerLabel(ctx),
             sharedPath: plan.sharedPath,
             editsJson: JSON.stringify(plan.edits),
             linesRemoved: plan.linesRemoved,
@@ -299,7 +299,7 @@ export default defineAction({
           setId: set.id,
           status: "kept",
           mode,
-          caller: callerOf(ctx),
+          caller: await callerLabel(ctx),
           sharedPath: plan.sharedPath,
           editsJson: JSON.stringify(plan.edits),
           linesRemoved: plan.linesRemoved,

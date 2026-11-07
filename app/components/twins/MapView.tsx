@@ -108,7 +108,7 @@ export function MapView({ repoId }: { repoId: string }) {
             : "The check got worse, so it was undone automatically.",
         });
       } else {
-        toast.success(`${capital(who)} merged ${set.name}. Still builds.`);
+        toast.success(`${capital(who)} merged ${set.name}. Still builds.`, { position: "top-center" });
       }
     }
   }, [data]);
@@ -824,7 +824,7 @@ function Timeline({
             title="Fork the repo to your GitHub and open a pull request with the kept merges"
           >
             <IconExternalLink className="size-4" strokeWidth={1.8} />
-            {opening ? "Opening pull request…" : "Open pull request"}
+            {opening ? "Opening pull requestâ€¦" : "Open pull request"}
           </button>
         )}
       </div>
@@ -868,7 +868,8 @@ function TimelineRow({
       />
       <div className="flex items-baseline justify-between gap-2">
         <p className="min-w-0 text-[12.5px] text-[var(--paper-2)]">
-          <span className="text-[var(--paper)]">{who}</span> merged{" "}
+          <span className="text-[var(--paper)]">{who}</span>{" "}
+          {m.status === "refused" ? "tried to merge" : "merged"}{" "}
           <span className="tw-mono text-[var(--amber)]">{setName}</span>
         </p>
         <span className="tw-mono shrink-0 text-[10.5px] font-semibold tracking-[0.1em]" style={{ color }}>

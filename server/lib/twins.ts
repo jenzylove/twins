@@ -9,6 +9,7 @@ import {
   type ActionRunContext,
 } from "@agent-native/core/action";
 import { and, eq, inArray } from "drizzle-orm";
+import { getDbExec, sql } from "@agent-native/core/db";
 import { getDb, schema } from "../db/index.js";
 import { mergeMachine, repoMachine } from "../db/schema.js";
 import { EngineError } from "../engine/errors.js";
@@ -152,6 +153,27 @@ export function callerOf(ctx?: ActionRunContext): string {
   if (!ctx?.caller) return "unknown";
   const client = ctx.mcpClient?.name;
   return client ? `${ctx.caller}:${client}` : ctx.caller;
+}
+
+/**
+ * Like callerOf, but when an MCP client sent no name with the call, fall back to
+ * the name it registered with over OAuth (for example "Claude Code"), so the map
+ * can credit the right agent.
+ */
+export async function callerLabel(ctx?: ActionRunContext): Promise<string> {
+  const base = callerOf(ctx);
+  if (!ctx?.caller || ctx.mcpClient?.name) return base;
+  const clientId = ctx.mcpClient?.oauthClientId;
+  if (!clientId) return base;
+  try {
+    const { rows } = await getDbExec().execute(
+      sql`SELECT client_name FROM mcp_oauth_clients WHERE client_id = ${sql.value(clientId)} LIMIT 1`,
+    );
+    const name = (rows[0] as { client_name?: string } | undefined)?.client_name;
+    return name ? `${ctx.caller}:${name}` : base;
+  } catch {
+    return base;
+  }
 }
 
 type RepoEvent = "scanned" | "prepared" | "fail" | "reprepare";
