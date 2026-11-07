@@ -231,7 +231,12 @@ export function useTwinsActions(repoId: string) {
 
 /** Link GitHub (with permission to open pull requests) to the signed-in account. */
 export async function connectGithub(): Promise<void> {
-  const res = await fetch("/api/auth/link-social", {
+  const prep = await fetch("/api/github-link", { method: "POST", credentials: "include" });
+  if (!prep.ok) {
+    const j = (await prep.json().catch(() => null)) as { message?: string } | null;
+    throw new Error(j?.message ?? "Could not start the GitHub connection.");
+  }
+  const res = await fetch("/_agent-native/auth/ba/link-social", {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
