@@ -500,6 +500,9 @@ function ComparePanel({
   const { runMerge } = useTwinsActions(repoId);
   const [pending, setPending] = useState(false);
   const ready = data.status === "ready";
+  // A sandbox hiccup, not a repo problem: merging again restarts the sandbox first.
+  const retryable =
+    data.status === "failed" && /retry/i.test(data.statusDetail ?? "");
   const latest = data.merges.find((m) => m.setId === set.id);
   const refusedErrors: Diag[] | null =
     outcome?.status === "refused"
@@ -563,16 +566,18 @@ function ComparePanel({
                 <button
                   type="button"
                   onClick={() => void merge()}
-                  disabled={pending || !ready}
+                  disabled={pending || !(ready || retryable)}
                   className="tw-btn tw-btn-primary h-9"
-                  title={ready ? undefined : "Waiting for the sandbox"}
+                  title={ready || retryable ? undefined : "Waiting for the sandbox"}
                 >
                   <IconGitMerge className="size-4" strokeWidth={1.8} />
                   {pending
                     ? "Checking the build…"
                     : ready
                       ? `Merge ${set.members.length} copies`
-                      : "Sandbox warming up"}
+                      : retryable
+                        ? "Restart sandbox and merge"
+                        : "Sandbox warming up"}
                 </button>
               ) : null}
             </>
