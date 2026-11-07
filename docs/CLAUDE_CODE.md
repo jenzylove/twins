@@ -20,7 +20,7 @@ This writes a remote MCP entry for Twins into your Claude Code config. It holds 
 2. Run `/mcp`, pick the Twins server, and choose **Authenticate**.
 3. Your browser opens Twins. Sign in and approve access. Claude Code now acts as you.
 
-Check it worked: ask Claude Code "What Twins tools do you have?" It should list `import-repo`, `get-map`, `find-twins`, `compare-twins`, `merge-twins`, `undo-merge`, `export-patch` and `open-pull-request`.
+Check it worked: ask Claude Code "What Twins tools do you have?" It should list `import-repo`, `get-map`, `find-twins`, `compare-twins`, `read-file`, `merge-twins`, `undo-merge`, `export-patch` and `open-pull-request`.
 
 ## 3. Open the map next to the terminal
 

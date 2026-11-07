@@ -49,6 +49,7 @@ export const twinsErrors = defineActionErrors(
   "not_ready",
   "not_mergeable",
   "invalid_edits",
+  "invalid_path",
   "low_coverage",
   "merge_refused",
   "undo_blocked",
