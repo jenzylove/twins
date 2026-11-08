@@ -4,6 +4,7 @@ import {
   loadActionsFromStaticRegistry,
 } from "@agent-native/core/server";
 
+import { createAISDKEngine } from "@agent-native/core/agent/engine";
 import actionsRegistry from "../../.generated/actions-registry.js";
 import { mapEmbed } from "../lib/map-embed.js";
 
@@ -71,8 +72,25 @@ function mapWidgetTarget(args: Record<string, unknown>, result?: unknown) {
   };
 }
 
+// The in-app agent talks to an OpenAI-compatible model API (Meta's) with the
+// model fixed by AGENT_MODEL. Passing the engine explicitly keeps the framework
+// from swapping the model name for a default OpenAI one.
+// guard:allow-env-credential — deploy-level LLM config, not a user credential
+const llmKey = process.env.OPENAI_API_KEY;
+const engine = llmKey
+  ? createAISDKEngine("openai", {
+      apiKey: llmKey,
+      // guard:allow-env-credential — deploy-level LLM config, not a user credential
+      baseUrl: process.env.OPENAI_BASE_URL || "https://api.meta.ai/v1",
+      model: process.env.AGENT_MODEL || "muse-spark-1.3",
+      acceptsCustomModels: true,
+      allowEnvFallback: false,
+    })
+  : undefined;
+
 export default createAgentChatPlugin({
   appId: "twins-app",
+  ...(engine ? { engine } : {}),
   actions,
   mcp: {
     connectorCatalog: [],
