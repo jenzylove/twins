@@ -4,7 +4,11 @@ import {
   loadActionsFromStaticRegistry,
 } from "@agent-native/core/server";
 
-import { createAISDKEngine } from "@agent-native/core/agent/engine";
+import {
+  createAISDKEngine,
+  getAgentEngineEntry,
+  registerBuiltinEngines,
+} from "@agent-native/core/agent/engine";
 import actionsRegistry from "../../.generated/actions-registry.js";
 import { mapEmbed } from "../lib/map-embed.js";
 
@@ -72,21 +76,33 @@ function mapWidgetTarget(args: Record<string, unknown>, result?: unknown) {
   };
 }
 
-// The in-app agent talks to an OpenAI-compatible model API (Meta's) with the
-// model fixed by AGENT_MODEL. Passing the engine explicitly keeps the framework
-// from swapping the model name for a default OpenAI one.
+// The in-app agent talks to an OpenAI-compatible model API (Meta's). A saved
+// engine selection makes the framework rebuild the built-in OpenAI engine on
+// every run, so point that entry at the deployment's own endpoint and key:
+// every path that picks it then reaches Meta with the right model name.
 // guard:allow-env-credential — deploy-level LLM config, not a user credential
 const llmKey = process.env.OPENAI_API_KEY;
-const engine = llmKey
-  ? createAISDKEngine("openai", {
-      apiKey: llmKey,
-      // guard:allow-env-credential — deploy-level LLM config, not a user credential
-      baseUrl: process.env.OPENAI_BASE_URL || "https://api.meta.ai/v1",
-      model: process.env.AGENT_MODEL || "muse-spark-1.3",
-      acceptsCustomModels: true,
-      allowEnvFallback: false,
-    })
-  : undefined;
+// guard:allow-env-credential — deploy-level LLM config, not a user credential
+const llmBaseUrl = process.env.OPENAI_BASE_URL || "https://api.meta.ai/v1";
+const llmModel = process.env.AGENT_MODEL || "muse-spark-1.3";
+const metaEngine = (config: Record<string, unknown> = {}) =>
+  createAISDKEngine("openai", {
+    ...config,
+    apiKey: llmKey,
+    baseUrl: llmBaseUrl,
+    requestFetch: undefined,
+    model: llmModel,
+    acceptsCustomModels: true,
+    allowEnvFallback: false,
+  });
+if (llmKey) {
+  registerBuiltinEngines();
+  const openaiEntry = getAgentEngineEntry("ai-sdk:openai") as
+    | { create: (config: Record<string, unknown>) => unknown }
+    | undefined;
+  if (openaiEntry) openaiEntry.create = (config) => metaEngine(config);
+}
+const engine = llmKey ? metaEngine() : undefined;
 
 export default createAgentChatPlugin({
   appId: "twins-app",
