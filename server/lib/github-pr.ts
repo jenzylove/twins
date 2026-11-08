@@ -155,9 +155,13 @@ export function defaultTitle(merges: KeptMerge[]): string {
     : `Merge duplicate code (${merges.length} copy sets)`;
 }
 
-export function branchName(id: string): string {
+export function branchName(id: string, mergeIds: string[] = []): string {
   const short = id.replace(/[^a-zA-Z0-9]/g, "").slice(0, 8) || "x";
-  return `twins/merge-copies-${short}`;
+  if (mergeIds.length === 0) return `twins/merge-copies-${short}`;
+  // One branch per set of kept merges: the same merges map to the same branch.
+  let h = 0;
+  for (const c of [...mergeIds].sort().join(",")) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return `twins/merge-copies-${short}-${h.toString(36).slice(0, 6)}`;
 }
 
 export function isGuardedOwner(owner: string): boolean {
@@ -303,11 +307,36 @@ export async function openPullRequest(
       )
     ).json;
 
-    const branch = branchName(input.repoId);
-    await gh.call("POST", `/repos/${forkFull}/git/refs`, {
-      ref: `refs/heads/${branch}`,
-      sha: upstream.sha,
-    });
+    const branch = branchName(input.repoId, merges.map((m) => m.id));
+    const made = await gh.call(
+      "POST",
+      `/repos/${forkFull}/git/refs`,
+      { ref: `refs/heads/${branch}`, sha: upstream.sha },
+      [200, 201, 422],
+    );
+    if (made.status === 422) {
+      // These exact merges were sent before: hand back that pull request.
+      const open = (
+        await gh.call<{ html_url: string; number: number }[]>(
+          "GET",
+          `/repos/${up}/pulls?state=all&head=${encodeURIComponent(`${forkOwner}:${branch}`)}`,
+        )
+      ).json;
+      if (open[0] && !input.forkOnly) {
+        return { url: open[0].html_url, number: open[0].number, branch, fork: forkFull };
+      }
+      if (input.forkOnly) {
+        return {
+          url: `https://github.com/${up}/compare/${upstream.defaultBranch}...${forkOwner}:${branch}?expand=1`,
+          branch,
+          fork: forkFull,
+        };
+      }
+      throw new GithubPrError(
+        "github_error",
+        `The branch ${branch} already exists on ${forkFull} without a pull request. Delete it on GitHub and try again.`,
+      );
+    }
     wrote = true;
 
     // Keep file modes of files that already exist.

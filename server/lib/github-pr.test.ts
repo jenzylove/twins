@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   GithubPrError,
+  branchName,
   buildPrBody,
   collapseEdits,
   openPullRequest,
@@ -121,6 +122,7 @@ describe("openPullRequest", () => {
     ]),
     merge("2", "Card", [{ path: "a.ts", before: "mid", after: "new é" }]),
   ];
+  const BR = branchName("abcd1234-ffff", ["1", "2"]);
 
   it("runs fork, poll, branch, blobs, tree, commit, ref update, PR in order", async () => {
     const { f, calls } = mockFetch({ forkReadyAfter: 2 });
@@ -148,12 +150,12 @@ describe("openPullRequest", () => {
       "POST /repos/me/app/git/blobs",
       "POST /repos/me/app/git/trees",
       "POST /repos/me/app/git/commits",
-      "PATCH /repos/me/app/git/refs/heads/twins/merge-copies-abcd1234",
+      `PATCH /repos/me/app/git/refs/heads/${BR}`,
       "POST /repos/acme/app/pulls",
     ]);
     const ref = calls.find((c) => c.url === "/repos/me/app/git/refs")!;
     expect(ref.body).toEqual({
-      ref: "refs/heads/twins/merge-copies-abcd1234",
+      ref: `refs/heads/${BR}`,
       sha: "base123",
     });
     const blob = calls.find((c) => c.url.endsWith("/blobs"))!;
@@ -172,7 +174,7 @@ describe("openPullRequest", () => {
     expect(commit.body.parents).toEqual(["base123"]);
     expect(commit.body.tree).toBe("tree1");
     const pr = calls.find((c) => c.url === "/repos/acme/app/pulls")!;
-    expect(pr.body.head).toBe("me:twins/merge-copies-abcd1234");
+    expect(pr.body.head).toBe(`me:${BR}`);
     expect(pr.body.base).toBe("main");
     expect(pr.body.body).toContain("### Card");
     expect(pr.body.body).toContain("Opened with Twins");
@@ -191,7 +193,7 @@ describe("openPullRequest", () => {
       sleep: async () => {},
     });
     expect(r.url).toBe(
-      "https://github.com/acme/app/compare/main...me:twins/merge-copies-abcd1234?expand=1",
+      `https://github.com/acme/app/compare/main...me:${BR}?expand=1`,
     );
     expect(calls.some((c) => c.url.endsWith("/pulls"))).toBe(false);
   });
@@ -275,5 +277,13 @@ describe("resolveGithubToken", () => {
     }, "a@b.c");
     expect(tok).toBe("tok");
     expect(args).toEqual(["github", "a@b.c"]);
+  });
+});
+
+describe("branchName", () => {
+  it("gives the same merges the same branch and new merges a new one", () => {
+    expect(branchName("abcd1234-x", ["b", "a"])).toBe(branchName("abcd1234-x", ["a", "b"]));
+    expect(branchName("abcd1234-x", ["a"])).not.toBe(branchName("abcd1234-x", ["a", "b"]));
+    expect(branchName("abcd1234-x", ["a"])).toMatch(/^twins\/merge-copies-abcd1234-[a-z0-9]+$/);
   });
 });

@@ -145,7 +145,7 @@ function CopyCommand({ text }: { text: string }) {
 const STEPS = [
   {
     t: "Paste",
-    d: "Any public GitHub link. Twins reads every TypeScript and JavaScript file and records a baseline: type errors, files checked, build.",
+    d: "A public GitHub link to a TypeScript or JavaScript app. Twins reads every source file and records a baseline: type errors, files checked, build.",
   },
   {
     t: "See",
@@ -157,7 +157,7 @@ const STEPS = [
   },
   {
     t: "Pull request",
-    d: "Every kept merge is checked against the baseline. Take the patch, or open a pull request with one commit per merge.",
+    d: "Every kept merge is checked against the baseline. Take the patch, or open one pull request that carries every kept merge.",
   },
 ];
 
@@ -168,7 +168,7 @@ const FAQ = [
   },
   {
     q: "Does my code run on your server?",
-    a: "No. The server only downloads the source and parses it. Installs, type checks and builds run inside an isolated sandbox with the network cut off after install.",
+    a: "No. The server only downloads the source and parses it. Installs, type checks and builds run inside an isolated sandbox. Install scripts are turned off, and the network is cut off before the build runs.",
   },
   {
     q: "What does said no mean?",
@@ -180,11 +180,11 @@ const FAQ = [
   },
   {
     q: "Which repos work?",
-    a: "Public TypeScript and JavaScript repos up to about 300 source files, with one tsconfig. Private repos and monorepos with many projects are not supported yet.",
+    a: "Public TypeScript and JavaScript repos up to 200 MB, including monorepos where each package has its own tsconfig. Twins merges only when it can type check most of the code. Private repos are not supported yet.",
   },
   {
     q: "What do I get at the end?",
-    a: "A patch you can apply with git, and soon a pull request on your repo. Each merge is listed with what moved and the lines removed.",
+    a: "A pull request on your repo, or on your fork if the repo is not yours, or a patch you can apply with git. Each merge is listed with what moved and the lines removed.",
   },
 ];
 

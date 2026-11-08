@@ -16,7 +16,12 @@ import {
 } from "../server/lib/twins.js";
 import fs from "node:fs";
 import { noteExternalWrite } from "@agent-native/core/action";
-import { eq } from "drizzle-orm";
+import { and, desc, eq, gt, isNotNull, ne } from "drizzle-orm";
+import { stopSandbox } from "../server/engine/sandbox.js";
+
+/** Imports per user per day, and sandboxes a user keeps running at once. */
+const DAILY_IMPORTS = 20;
+const LIVE_SANDBOXES = 2;
 
 export default defineAction({
   description:
@@ -70,6 +75,18 @@ export default defineAction({
   errors: twinsErrors,
   run: async (args, ctx) => {
     const { email, orgId } = requireUser(ctx);
+    const dayAgo = new Date(Date.now() - 24 * 3600_000).toISOString();
+    const recent = await getDb()
+      .select({ id: schema.repos.id })
+      .from(schema.repos)
+      .where(and(eq(schema.repos.ownerEmail, email), gt(schema.repos.createdAt, dayAgo)));
+    if (recent.length >= DAILY_IMPORTS) {
+      bail(
+        `You have imported ${DAILY_IMPORTS} repos in the last day. Reuse one of your maps or try again tomorrow.`,
+        "rate_limited",
+        { statusCode: 429 },
+      );
+    }
     const info = await engine(async () => fetchRepoInfo(parseRepoUrl(args.url)));
     const id = crypto.randomUUID();
     const now = nowIso();
@@ -115,6 +132,28 @@ export default defineAction({
       .where(eq(schema.repos.id, id))
       .limit(1);
     if (!row) return bail("Repo vanished.", "repo_not_found", { statusCode: 500 });
+    // Keep at most LIVE_SANDBOXES running per user: stop the least recently used.
+    // A stopped repo restarts its sandbox (and replays kept merges) on its next merge.
+    const live = await getDb()
+      .select({ id: schema.repos.id, sandboxId: schema.repos.sandboxId })
+      .from(schema.repos)
+      .where(
+        and(
+          eq(schema.repos.ownerEmail, email),
+          ne(schema.repos.id, id),
+          isNotNull(schema.repos.sandboxId),
+        ),
+      )
+      .orderBy(desc(schema.repos.updatedAt));
+    for (const old of live.slice(LIVE_SANDBOXES - 1)) {
+      noteExternalWrite("vercel-sandbox");
+      void stopSandbox(old.sandboxId!);
+      await getDb()
+        .update(schema.repos)
+        .set({ sandboxId: null })
+        .where(eq(schema.repos.id, old.id));
+      fs.rmSync(workdirFor(old.id), { recursive: true, force: true });
+    }
     // Background prepare: never awaited. ensureReady finishes it if this dies.
     void startPrepare(row);
     return {

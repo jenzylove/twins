@@ -167,8 +167,13 @@ npm install --prefix /tmp/checker @typescript/native-preview --no-audit --no-fun
   ]);
   try {
     await sbx.updateNetworkPolicy("deny-all");
-  } catch {
-    // Policy update is best effort; the checks themselves never run repo scripts.
+  } catch (err) {
+    // The build runs repo scripts, so it never runs with the network open.
+    throw new EngineError(
+      "sandbox_create_failed",
+      "Could not cut the sandbox off from the network.",
+      { cause: redact(String(err)).slice(0, 200) },
+    );
   }
   onStage(hasBuild ? "building" : "type checking baseline");
   const first = await runCheck(sandboxId, targets, hasBuild);
@@ -257,14 +262,14 @@ export async function writeFiles(
   if (writes.length) {
     const dirs = [...new Set(writes.map((w) => w.path.split("/").slice(0, -1).join("/")).filter(Boolean))];
     if (dirs.length) {
-      await sh(sbx, `mkdir -p ${dirs.map((d) => JSON.stringify(d)).join(" ")}`);
+      await sh(sbx, `mkdir -p ${dirs.map((d) => shq(d)).join(" ")}`);
     }
     await sbx.writeFiles(
       writes.map((w) => ({ path: w.path, content: Buffer.from(w.content, "utf8") })),
     );
   }
   if (deletes.length) {
-    await sh(sbx, `rm -f ${deletes.map((d) => JSON.stringify(d)).join(" ")}`);
+    await sh(sbx, `rm -f ${deletes.map((d) => shq(d)).join(" ")}`);
   }
 }
 

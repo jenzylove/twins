@@ -58,6 +58,7 @@ export const twinsErrors = defineActionErrors(
   "nothing_to_merge",
   "upstream_confirmation_required",
   "github_error",
+  "rate_limited",
 );
 
 type ErrCode = (typeof twinsErrors.codes)[number];
