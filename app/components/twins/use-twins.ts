@@ -229,26 +229,8 @@ export function useTwinsActions(repoId: string) {
   return { runMerge, runUndo, runExport, runOpenPr, undoPending: undo.isPending };
 }
 
-/** Link GitHub (with permission to open pull requests) to the signed-in account. */
+/** Send the user to GitHub to grant Twins public_repo access, then back here. */
 export async function connectGithub(): Promise<void> {
-  const prep = await fetch("/api/github-link", { method: "POST", credentials: "include" });
-  if (!prep.ok) {
-    const j = (await prep.json().catch(() => null)) as { message?: string } | null;
-    throw new Error(j?.message ?? "Could not start the GitHub connection.");
-  }
-  const res = await fetch("/_agent-native/auth/ba/link-social", {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      provider: "github",
-      scopes: ["public_repo"],
-      callbackURL: window.location.href,
-    }),
-  });
-  const json = (await res.json().catch(() => null)) as { url?: string; message?: string } | null;
-  if (!res.ok || !json?.url) {
-    throw new Error(json?.message ?? "Could not start the GitHub connection.");
-  }
-  window.location.href = json.url;
+  const back = window.location.pathname + window.location.search;
+  window.location.href = `/api/github/start?return=${encodeURIComponent(back)}`;
 }

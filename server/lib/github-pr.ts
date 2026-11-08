@@ -46,7 +46,19 @@ export type SqlExec = (q: {
 export async function resolveGithubToken(
   exec: SqlExec,
   email: string,
+  stored?: (email: string) => Promise<{ access_token?: string; scope?: string } | null>,
 ): Promise<string> {
+  // Preferred: the token from Twins' own Connect GitHub flow (no account linking).
+  const own = stored ? await stored(email).catch(() => null) : null;
+  if (own?.access_token) {
+    if (!String(own.scope ?? "").split(/[\s,]+/).includes("public_repo")) {
+      throw new GithubPrError(
+        "github_not_connected",
+        "GitHub is connected without permission to write to public repos. Press Connect GitHub and approve public_repo, then try again.",
+      );
+    }
+    return own.access_token;
+  }
   const { rows } = await exec({
     sql: `SELECT a.access_token AS access_token, a.scope AS scope
 FROM "account" a JOIN "user" u ON u.id = a.user_id

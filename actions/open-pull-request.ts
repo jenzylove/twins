@@ -1,3 +1,5 @@
+import { listOAuthAccountsByOwner } from "@agent-native/core/oauth-tokens";
+import { GITHUB_PROVIDER } from "../server/lib/github-connect.js";
 import {
   defineAction,
   fail,
@@ -62,6 +64,10 @@ export default defineAction({
       token = await resolveGithubToken(
         (q) => getDbExec().execute(q) as never,
         email,
+        async (e) => {
+          const accounts = await listOAuthAccountsByOwner(GITHUB_PROVIDER, e.toLowerCase());
+          return (accounts[0]?.tokens as { access_token?: string; scope?: string }) ?? null;
+        },
       );
     } catch (e) {
       if (e instanceof GithubPrError) bail(e.message, e.code);
