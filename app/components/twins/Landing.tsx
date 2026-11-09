@@ -72,9 +72,9 @@ function useScrollProgress<T extends HTMLElement>() {
 
 const PHASE_LINE: Record<HeroPhase, { text: string; tone: string }> = {
   apart: { text: "formatDate, written twice in two files", tone: "var(--paper-3)" },
-  joining: { text: "Merging into one shared file, then type checking", tone: "var(--accent)" },
-  kept: { text: "Kept. Type check 0 errors, same as before", tone: "var(--green)" },
-  refused: { text: "Said no. 2 new type errors, so it was undone", tone: "var(--red)" },
+  joining: { text: "Keeping one copy, then testing the whole app", tone: "var(--accent)" },
+  kept: { text: "Kept. The app still works", tone: "var(--green)" },
+  refused: { text: "Said no. It would break 2 places, so nothing changed", tone: "var(--red)" },
 };
 
 function Hero() {
@@ -97,9 +97,9 @@ function Hero() {
           className="tw-hero-in mt-6 max-w-[600px] text-[17px] leading-relaxed text-[var(--paper-2)] md:text-[18px]"
           style={{ animationDelay: "240ms" }}
         >
-          Paste a GitHub repo. Twins finds every place the same code was written
-          again, merges the copies into one shared file, and keeps the merge only
-          if your app still type checks.
+          Paste a GitHub repo. Twins finds the code your AI wrote more than once
+          and keeps one copy, so a fix lands everywhere. It only makes the change
+          if your app still works.
         </p>
         <div className="tw-hero-in mt-8 flex flex-wrap justify-center gap-3" style={{ animationDelay: "320ms" }}>
           <Link to="/map" className="tw-btn tw-btn-primary h-12 px-6 text-[15px]">
@@ -132,7 +132,7 @@ function Hero() {
 /* ------------------------------ problem statement -------------------------- */
 
 const PROBLEM =
-  "AI coding tools copy instead of reuse. One app ends up with three ways to call the API and four ways to format a date. The copies drift, and a fix lands in only one of them.";
+  "You ask your AI to fix a bug and it does. A week later the same bug is back, because the AI wrote that code twice and only one copy got the fix.";
 
 function Problem() {
   const { ref, p } = useScrollProgress<HTMLDivElement>();
@@ -238,23 +238,23 @@ function MapDemo() {
 const STEPS = [
   {
     t: "Paste a repo",
-    d: "A public GitHub link to a TypeScript or JavaScript app, monorepos included. Twins reads every source file and records a baseline first: type errors, files checked, and whether the build passes.",
+    d: "Any public GitHub link to a TypeScript or JavaScript app. Twins reads every file and first notes how healthy your app is today, so it can promise to never make it worse.",
   },
   {
     t: "See the copies",
-    d: "Folders become rooms and files become cells. Every function that was written more than once glows, with a line drawn between the copies, biggest first.",
+    d: "Your code becomes a map. Everything written more than once lights up, each copy numbered, biggest first.",
   },
   {
     t: "Merge them",
-    d: "One click moves an exact copy into one shared file and rewires every caller. Copies that differ in a few values go to the agent, which writes one shared version.",
+    d: "One click keeps one copy and points every place that used the others at it. Copies with small differences go to the assistant, which writes one version that fits them all.",
   },
   {
-    t: "Keep what builds",
-    d: "The whole app is type checked again in a sealed sandbox. No new errors and the merge is kept. One new error and it is written back, with the exact lines shown.",
+    t: "Only if it still works",
+    d: "Twins tests the whole app on a private copy first. If nothing breaks, the merge is kept. If anything breaks, your code stays exactly as it was and you see what would have broken.",
   },
   {
     t: "Ship the pull request",
-    d: "Open one pull request on your repo, or on your fork, carrying every kept merge. Or take the patch and apply it with git.",
+    d: "Send it to your repo in one click. Twins opens the pull request for you with every kept merge inside, or you can download the change as a patch.",
   },
 ];
 
@@ -365,7 +365,7 @@ function SaidNo() {
     <section id="said-no" className="bg-[var(--paper)] px-4 py-28 text-[var(--ink)] md:px-10 md:py-40">
       <div className="mx-auto max-w-[1200px]">
         <p className="tw-kicker rv" style={{ color: "rgba(242,241,237,0.5)" }}>
-          The check
+          The safety test
         </p>
         <h2 className="tw-display rv mt-6 text-[44px] md:text-[88px]">
           Claude Code said done.
@@ -375,28 +375,36 @@ function SaidNo() {
 
         <div className="mt-16 grid gap-12 md:grid-cols-2 md:gap-0">
           <div className="rv md:border-r md:border-[rgba(242,241,237,0.14)] md:pr-12">
-            <p className="tw-mono text-[11px] uppercase tracking-[0.14em] text-[rgba(242,241,237,0.45)]">In the terminal</p>
-            <pre className="tw-code mt-6 whitespace-pre-wrap text-[13px] leading-[1.9] text-[rgba(242,241,237,0.7)]">
-              <span className="text-[#9d8cff]">&gt; </span>
-              <span className="text-[var(--ink)]">merge every copy of createSupabaseFetch</span>
-              {"\n\n"}● twins · compare-twins{"\n"}● twins · read-repo-file{"\n"}● twins · merge-twins, 3 files
-              {"\n\n"}
-              <span className="text-[var(--ink)]">Done. The three clients now share one helper.</span>
-            </pre>
+            <p className="tw-mono text-[11px] uppercase tracking-[0.14em] text-[rgba(242,241,237,0.45)]">What the agent said</p>
+            <div className="mt-6 space-y-5 text-[16px] leading-relaxed">
+              <p>
+                <span className="tw-mono mr-3 text-[11px] uppercase tracking-[0.14em] text-[rgba(242,241,237,0.45)]">You</span>
+                <span className="text-[var(--ink)]">Merge every copy of createSupabaseFetch.</span>
+              </p>
+              <p>
+                <span className="tw-mono mr-3 text-[11px] uppercase tracking-[0.14em] text-[#9d8cff]">Claude Code</span>
+                <span className="text-[var(--ink)]">Done. The three files now share one helper.</span>
+              </p>
+            </div>
+            <p className="mt-8 text-[14px] text-[rgba(242,241,237,0.5)]">
+              It believes it. It never ran your app.
+            </p>
           </div>
           <div className="rv relative md:pl-12" style={{ transitionDelay: "450ms" }}>
-            <p className="tw-mono text-[11px] uppercase tracking-[0.14em] text-[rgba(242,241,237,0.45)]">On the map, the same second</p>
-            <p className="tw-mono mt-6 text-[12px] font-semibold tracking-[0.12em] text-[#ff5a3d]">SAID NO · UNDONE AUTOMATICALLY</p>
-            <ul className="tw-code mt-4 space-y-3 text-[12.5px] text-[rgba(242,241,237,0.7)]">
+            <p className="tw-mono text-[11px] uppercase tracking-[0.14em] text-[rgba(242,241,237,0.45)]">What Twins found, the same second</p>
+            <p className="mt-6 text-[20px] leading-snug text-[var(--ink)]">
+              This would break your app in <span className="text-[#ff5a3d]">2 places.</span>
+              <br />
+              Nothing was changed.
+            </p>
+            <ul className="mt-6 space-y-4 text-[15px] text-[rgba(242,241,237,0.7)]">
               <li>
-                <span className="text-[#ff8a73]">src/integrations/supabase/client.server.ts:31</span>
-                <br />
-                TS2554 Expected 2 arguments, but got 1.
+                <span className="tw-mono block text-[12px] text-[#ff8a73]">client.server.ts, line 31</span>
+                The new helper needs two values. This file still sends one.
               </li>
               <li>
-                <span className="text-[#ff8a73]">src/integrations/supabase/auth-middleware.ts:40</span>
-                <br />
-                TS2345 Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+                <span className="tw-mono block text-[12px] text-[#ff8a73]">auth-middleware.ts, line 40</span>
+                A value that can be empty is now passed where an empty one breaks.
               </li>
             </ul>
             <div className="tw-said-stamp" aria-hidden>
@@ -406,10 +414,10 @@ function SaidNo() {
         </div>
 
         <p className="rv mt-16 max-w-[640px] text-[17px] leading-relaxed text-[rgba(242,241,237,0.66)]">
-          The check runs inside the merge action, not in the page. You, the built
-          in agent and Claude Code over MCP all call that same action, so a merge
-          that adds one type error, or breaks a build that passed, is written back
-          before anyone sees it.
+          Every merge goes through the same test, whether you click the button, ask
+          the assistant inside Twins, or ask Claude Code. Nobody can skip it. Twins
+          tries the change on a private copy of your app first, and if anything
+          breaks, your code stays exactly as it was.
         </p>
       </div>
     </section>
@@ -490,23 +498,23 @@ function Agents() {
 const FAQ = [
   {
     q: "What counts as a copy?",
-    a: "Two functions with the same structure once names and values are set aside. Exact copies share the same code and imports and merge in one click. Near copies have the same shape with small differences, and the agent writes one shared version for those.",
+    a: "Code that does the same job written in more than one place. Identical copies are fixed in one click. Similar copies with small differences go to the assistant, which writes one version that fits every use.",
   },
   {
     q: "Does my code run on your server?",
-    a: "No. The server only downloads the source and reads it. Installs, type checks and builds run in an isolated sandbox with install scripts turned off, and the network is cut before the build runs.",
+    a: "No. Our server only reads your code. Every test runs in a sealed, throwaway machine with no internet access during the build, and it is deleted afterwards.",
   },
   {
-    q: "What does said no mean?",
-    a: "After a merge Twins type checks the whole app again. If there is even one error that was not in the baseline, or a build that passed now fails, the merge is written back and recorded as said no, with the exact errors.",
+    q: "What does \"said no\" mean?",
+    a: "Twins tried the merge and it would have broken something that worked before. So nothing changed, and Twins shows you exactly which lines would have broken.",
   },
   {
     q: "Can Claude Code get around the check?",
-    a: "No. The check lives inside the merge action itself. The page, the built in agent and Claude Code over MCP all call that same action, so the same rule applies to each of them.",
+    a: "No. The test is built into the merge itself, not the page. You, the assistant inside Twins and Claude Code all go through the same merge, so the same test applies to everyone.",
   },
   {
     q: "Which repos work?",
-    a: "Public TypeScript and JavaScript repos up to 200 MB, including monorepos where each package has its own tsconfig. Twins merges only where it can type check the code. Private repos are not supported yet.",
+    a: "Public TypeScript and JavaScript repos up to 200 MB, including ones with several apps inside. Private repos are not supported yet.",
   },
   {
     q: "What do I get at the end?",
@@ -629,7 +637,7 @@ export function Landing() {
             </div>
             <p className="mt-4 max-w-[320px] text-[14.5px] leading-relaxed text-[var(--paper-2)]">
               Finds the code your AI wrote twice and keeps one copy, only when your
-              app still type checks.
+              app still works.
             </p>
           </div>
           <div>
