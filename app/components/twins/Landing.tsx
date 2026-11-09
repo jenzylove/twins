@@ -432,7 +432,12 @@ function CopyCommand({ text, prompt = "$ " }: { text: string; prompt?: string })
     <div className="flex items-center gap-4 border-b border-[var(--hair-3)] pb-4">
       <code className="tw-mono min-w-0 flex-1 break-words text-[13px] leading-relaxed text-[var(--paper)] md:text-[14px]">
         {prompt ? <span className="select-none text-[var(--accent)]">{prompt}</span> : null}
-        {text}
+        {text.split(" ").map((w, n) => (
+          <span key={n} className="whitespace-nowrap">
+            {n ? " " : ""}
+            {w}
+          </span>
+        ))}
       </code>
       <button
         type="button"
