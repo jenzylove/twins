@@ -430,7 +430,7 @@ function CopyCommand({ text, prompt = "$ " }: { text: string; prompt?: string })
   const [copied, setCopied] = useState(false);
   return (
     <div className="flex items-center gap-4 border-b border-[var(--hair-3)] pb-4">
-      <code className="tw-mono min-w-0 flex-1 break-all text-[13px] leading-relaxed text-[var(--paper)] md:text-[14px]">
+      <code className="tw-mono min-w-0 flex-1 break-words text-[13px] leading-relaxed text-[var(--paper)] md:text-[14px]">
         {prompt ? <span className="select-none text-[var(--accent)]">{prompt}</span> : null}
         {text}
       </code>
