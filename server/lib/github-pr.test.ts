@@ -71,6 +71,11 @@ function mockFetch(opts: { forkReadyAfter?: number; viewer?: string } = {}) {
         html_url: "https://github.com/acme/app/pull/7",
         number: 7,
       });
+    if (u === "/repos/me/app/pulls")
+      return res(201, {
+        html_url: "https://github.com/me/app/pull/3",
+        number: 3,
+      });
     return res(500, { message: "unexpected " + u });
   }) as unknown as typeof fetch;
   return { f, calls };
@@ -124,6 +129,56 @@ describe("openPullRequest", () => {
   ];
   const BR = branchName("abcd1234-ffff", ["1", "2"]);
 
+  it("opens the PR on the user's own fork when they do not own the repo", async () => {
+    const { f, calls } = mockFetch();
+    const r = await openPullRequest({
+      token: "t",
+      fetch: f,
+      upstream,
+      repoId: "abcd1234-ef",
+      merges,
+      baseline,
+      sleep: async () => {},
+    });
+    expect(r).toMatchObject({ url: "https://github.com/me/app/pull/3", number: 3 });
+    expect(calls.some((c) => c.url === "/repos/acme/app/pulls")).toBe(false);
+    const pr = calls.find((c) => c.url === "/repos/me/app/pulls")!;
+    expect(pr.body.base).toBe("main");
+  });
+
+  it("opens the PR on the user's own repo with no fork", async () => {
+    const { f, calls } = mockFetch({ viewer: "acme" });
+    const fetchOwn = (async (url: string, init: any) => {
+      const u = String(url).replace("https://api.github.com", "");
+      const res = (status: number, json: unknown) =>
+        ({ status, statusText: "", json: async () => json }) as Response;
+      calls.push({ method: init.method, url: u, body: init.body ? JSON.parse(init.body) : undefined });
+      if (u === "/user") return res(200, { login: "acme" });
+      if (u === "/repos/acme/app/git/commits/base123") return res(200, { tree: { sha: "tree0" } });
+      if (u === "/repos/acme/app/git/refs") return res(201, {});
+      if (u.startsWith("/repos/acme/app/git/trees/tree0")) return res(200, { tree: [] });
+      if (u === "/repos/acme/app/git/blobs") return res(201, { sha: "b1" });
+      if (u === "/repos/acme/app/git/trees") return res(201, { sha: "tree1" });
+      if (u === "/repos/acme/app/git/commits") return res(201, { sha: "c1" });
+      if (u.startsWith("/repos/acme/app/git/refs/heads/")) return res(200, {});
+      if (u === "/repos/acme/app/pulls")
+        return res(201, { html_url: "https://github.com/acme/app/pull/9", number: 9 });
+      return res(500, { message: "unexpected " + u });
+    }) as unknown as typeof fetch;
+    void f;
+    const r = await openPullRequest({
+      token: "t",
+      fetch: fetchOwn,
+      upstream,
+      repoId: "abcd1234-ef",
+      merges,
+      baseline,
+      sleep: async () => {},
+    });
+    expect(r.url).toBe("https://github.com/acme/app/pull/9");
+    expect(calls.some((c) => c.url.endsWith("/forks"))).toBe(false);
+  });
+
   it("runs fork, poll, branch, blobs, tree, commit, ref update, PR in order", async () => {
     const { f, calls } = mockFetch({ forkReadyAfter: 2 });
     const sleeps: number[] = [];
@@ -134,6 +189,7 @@ describe("openPullRequest", () => {
       repoId: "abcd1234-ef",
       merges,
       baseline,
+      toUpstream: true,
       sleep: async (ms) => void sleeps.push(ms),
     });
     expect(r).toMatchObject({

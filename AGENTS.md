@@ -37,4 +37,4 @@ Twins imports a public GitHub repo, finds duplicate code, and merges copies insi
 | `merge-twins` | Merge a set `{ repoId, setId, memberIds?, sharedPath?, edits? }`. Exact copies merge deterministically; pass `edits` (full new file contents) for near copies. Refused with `merge_refused` if the type check gets worse. |
 | `undo-merge` | Revert a kept merge `{ repoId, mergeId }` and confirm the baseline is restored. |
 | `export-patch` | Unified diff of all kept merges `{ repoId }`. |
-| `open-pull-request` | Fork the public repo to the user's own GitHub, push the kept merges and open a PR `{ repoId, title?, body?, forkOnly?, confirmUpstream? }`. Needs the user's GitHub connected (`github_not_connected` otherwise). Refuses BuilderIO without `confirmUpstream`. |
+| `open-pull-request` | Push the kept merges and open a PR `{ repoId, title?, body?, forkOnly?, confirmUpstream?, toUpstream? }`: on the user's own repo, or on their own fork when they do not own it (pass `toUpstream` only if they explicitly ask for the original repo). Needs the user's GitHub connected (`github_not_connected` otherwise). Refuses BuilderIO without `confirmUpstream`. |

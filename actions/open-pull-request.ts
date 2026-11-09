@@ -26,7 +26,7 @@ import {
 
 export default defineAction({
   description:
-    "Open a pull request with all kept merges. Uses only the signed-in user's own GitHub connection: forks the public repo to their account, pushes a branch twins/merge-copies-<id> at the imported commit with the final content of every changed file, and opens a PR against the upstream default branch (or, with forkOnly, returns the compare URL). Fails with github_not_connected when the user has not connected GitHub; tell them to press Connect GitHub on the repo map. Refuses owner BuilderIO unless confirmUpstream is true.",
+    "Open a pull request with all kept merges. Uses only the signed-in user's own GitHub connection: pushes a branch twins/merge-copies-<id> at the imported commit with the final content of every changed file. If the user owns the repo, the PR opens on it. Otherwise Twins forks it to their account and opens the PR on their own fork, so nothing lands on someone else's project; only pass toUpstream when the user explicitly asks to send it to the original repo. With forkOnly it pushes the branch and returns the compare URL instead. Fails with github_not_connected when the user has not connected GitHub; tell them to press Connect GitHub on the repo map. Refuses owner BuilderIO unless confirmUpstream is true.",
   schema: z.object({
     repoId: z.string().describe("Repo id returned by import-repo"),
     title: z.string().max(250).optional().describe("PR title; defaults to a summary of the merges"),
@@ -39,6 +39,10 @@ export default defineAction({
       .boolean()
       .optional()
       .describe("Required to open a PR against a guarded upstream owner (BuilderIO)"),
+    toUpstream: z.coerce
+      .boolean()
+      .optional()
+      .describe("Open the PR on the original repo the user does not own. Only when the user explicitly asks for it."),
   }),
   outputSchema: z.object({
     id: z.string(),
@@ -107,6 +111,7 @@ export default defineAction({
         body: args.body,
         forkOnly: args.forkOnly,
         confirmUpstream: args.confirmUpstream,
+        toUpstream: args.toUpstream,
         onWriteStart: () => noteExternalWrite("github"),
       });
       if (!args.forkOnly) {

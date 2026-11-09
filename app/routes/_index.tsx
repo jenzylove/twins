@@ -2,7 +2,7 @@ import { Landing } from "@/components/twins/Landing";
 
 const SEO_TITLE = "Twins: your AI wrote it twice";
 const SEO_DESCRIPTION =
-  "Paste a GitHub repo. Twins finds the code your AI wrote twice, merges the copies into one shared file, and keeps the merge only if the app still type checks.";
+  "Paste a GitHub repo. Twins finds the code your AI wrote more than once and keeps one copy, so a fix lands everywhere, only if your app still builds with no new errors.";
 
 export function meta() {
   return [

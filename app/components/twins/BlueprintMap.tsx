@@ -463,7 +463,7 @@ export function BlueprintMap({
             border: "1px solid rgba(14,143,97,0.55)",
           }}
         >
-          ONE COPY · APP STILL WORKS
+          ONE COPY · NO NEW ERRORS
         </div>
       ) : null}
 

@@ -108,7 +108,7 @@ export function MapView({ repoId }: { repoId: string }) {
             : "It would have broken your app. Nothing changed.",
         });
       } else {
-        toast.success(`${capital(who)} merged ${set.name}. Your app still works.`, { position: "top-center" });
+        toast.success(`${capital(who)} merged ${set.name}. Still builds, no new errors.`, { position: "top-center" });
       }
     }
   }, [data]);
@@ -267,9 +267,9 @@ function TopStrip({ data }: { data: MapData }) {
                   />
                   {baseline.errors === 0
                     ? baseline.build?.ran && baseline.build.ok
-                      ? "Works. Builds with no errors."
-                      : "Works. No errors."
-                    : `Works, with ${formatNumber(baseline.errors)} known ${baseline.errors === 1 ? "issue" : "issues"}.`}
+                      ? "Builds with no errors."
+                      : "No type errors."
+                    : `Builds, with ${formatNumber(baseline.errors)} known ${baseline.errors === 1 ? "error" : "errors"}.`}
                 </span>
                 <span className="mt-0.5 block text-[12px] text-[var(--paper-3)]">
                   Every merge must keep it this way.{" "}
@@ -571,7 +571,7 @@ function ComparePanel({
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {merged ? (
-            <span className="tw-mono text-[12px] text-[var(--green)]">One copy · app still works</span>
+            <span className="tw-mono text-[12px] text-[var(--green)]">One copy · still builds, no new errors</span>
           ) : (
             <>
               <button
@@ -630,7 +630,7 @@ function ComparePanel({
         {merged ? (
           <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-6">
             <p className="max-w-md text-[13px] text-[var(--paper-2)]">
-              These copies now live in one shared file, and your app still works. Send it to your repo
+              These copies now live in one shared file, and your app still builds with no new errors. Send it to your repo
               as a pull request below, or undo it from the history.
             </p>
           </div>

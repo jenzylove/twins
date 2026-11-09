@@ -236,6 +236,12 @@ export type OpenPrInput = {
   body?: string | undefined;
   forkOnly?: boolean | undefined;
   confirmUpstream?: boolean | undefined;
+  /**
+   * Open the pull request on the original repo even when the user does not own
+   * it. Off by default: then the pull request opens on the user's own fork, so
+   * nothing lands on someone else's project unless they ask for it.
+   */
+  toUpstream?: boolean | undefined;
   /** Test hooks. */
   sleep?: (ms: number) => Promise<void>;
   now?: () => number;
@@ -280,8 +286,9 @@ export async function openPullRequest(
   let forkFull = up;
   let forkOwner = upstream.owner;
   let wrote = false;
+  const ownsRepo = viewer.toLowerCase() === upstream.owner.toLowerCase();
   try {
-    if (viewer.toLowerCase() !== upstream.owner.toLowerCase()) {
+    if (!ownsRepo) {
       const fork = (
         await gh.call<{ full_name: string; owner: { login: string } }>(
           "POST",
@@ -319,6 +326,9 @@ export async function openPullRequest(
       )
     ).json;
 
+    // Where the pull request opens: the user's repo, else their fork unless
+    // they asked for the original.
+    const prRepo = ownsRepo || input.toUpstream ? up : forkFull;
     const branch = branchName(input.repoId, merges.map((m) => m.id));
     const made = await gh.call(
       "POST",
@@ -331,7 +341,7 @@ export async function openPullRequest(
       const open = (
         await gh.call<{ html_url: string; number: number }[]>(
           "GET",
-          `/repos/${up}/pulls?state=all&head=${encodeURIComponent(`${forkOwner}:${branch}`)}`,
+          `/repos/${prRepo}/pulls?state=all&head=${encodeURIComponent(`${forkOwner}:${branch}`)}`,
         )
       ).json;
       if (open[0] && !input.forkOnly) {
@@ -415,7 +425,7 @@ export async function openPullRequest(
     const pr = (
       await gh.call<{ html_url: string; number: number }>(
         "POST",
-        `/repos/${up}/pulls`,
+        `/repos/${prRepo}/pulls`,
         {
           title,
           body: input.body?.trim() || buildPrBody(merges, input.baseline),

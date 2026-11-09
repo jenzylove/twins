@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>Your AI wrote it twice. Twins keeps one.</b><br />
-  Paste a public GitHub repo. Twins finds the code your AI wrote more than once, keeps one copy so a fix lands everywhere, and only makes the change if your app still works.
+  Paste a public GitHub repo. Twins finds the code your AI wrote more than once, keeps one copy so a fix lands everywhere, and only makes the change if your app still builds with no new errors.
 </p>
 
 <p align="center">
@@ -42,8 +42,15 @@ You ask your AI to fix a bug and it does. A week later the same bug is back some
 1. **Paste a repo.** Twins downloads the source, reads every file, and notes how healthy the app is today: type errors, which files it could check, and whether the build passes.
 2. **See the copies.** The code becomes a map. Everything written more than once lights up, each copy numbered, biggest first. Identical copies and similar copies are labelled, and the lines that differ are highlighted.
 3. **Keep one copy.** One click moves an identical helper into one shared file and points every caller at it. Similar copies go to the assistant, which writes one version that fits every use.
-4. **Only if it still works.** Every merge is tried on a private, throwaway machine first. Twins installs the app, runs the type check, and builds it if the build passed before. No new errors and the merge is kept. Anything new breaks and nothing changes; Twins shows exactly what would have broken.
-5. **Send it to your repo.** One click forks the repo if needed and opens a pull request carrying every kept merge, or downloads the change as a patch.
+4. **Only if it still builds.** Every merge is tried on a private, throwaway machine first. Twins installs the app, runs the type check, and builds it if the build passed before. No new errors and the merge is kept. Anything new breaks and nothing changes; Twins shows exactly what would have broken.
+5. **Send it to your repo.** One click opens a pull request carrying every kept merge: on your repo if it is yours, otherwise on your own fork, so nothing lands on someone else's project. Or download the change as a patch.
+
+### What the check proves, and what it does not
+
+* **It proves** the merge adds no new type errors anywhere the type checker can see, and that a build which passed before still passes.
+* **It does not prove** the app behaves exactly the same. A merge can compile and still change behaviour, which is why identical copies merge in one click while similar copies need an agent's edits, shown side by side with the differences highlighted before you merge.
+* **What counts as a copy:** top level functions and `const` functions, React components included, at least four lines long, written more than once (identical, or the same shape with small differences).
+* **What is skipped:** test files, type declaration files, shadcn `components/ui`, build output folders, files over 3,000 lines (usually generated), and for now class methods and nested functions.
 
 <p align="center">
   <img src="docs/media/map.png" alt="The Twins map: copies numbered on the map, the list of things written twice, and a history with one kept and one blocked merge" width="100%" />

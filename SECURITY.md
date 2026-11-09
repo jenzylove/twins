@@ -8,7 +8,7 @@
   * The sandbox is cut off from the network before the build runs, since a build runs scripts from the repo.
   * Sandboxes are created with persistence off and stop on a timeout, so nothing is kept after they stop.
 * A merge is written to the repo copy on the sandbox only. Your GitHub repo changes only when you choose "Send to my repo", which opens a pull request on your repo or on your fork. Twins never pushes to a default branch.
-* GitHub access is requested through OAuth only when you open a pull request, and only for that.
+* GitHub access is requested through OAuth only when you first send a merge to GitHub. GitHub's `public_repo` permission covers all of your public repos; Twins uses it only to fork the repo, push one branch and open the pull request. A pull request on a repo you do not own opens on your own fork.
 * Each user can import a limited number of repos per day.
 
 ## Agents

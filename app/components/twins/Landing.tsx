@@ -73,7 +73,7 @@ function useScrollProgress<T extends HTMLElement>() {
 const PHASE_LINE: Record<HeroPhase, { text: string; tone: string }> = {
   apart: { text: "formatDate, written twice in two files", tone: "var(--paper-3)" },
   joining: { text: "Keeping one copy, then testing the whole app", tone: "var(--accent)" },
-  kept: { text: "Kept. The app still works", tone: "var(--green)" },
+  kept: { text: "Kept. Still builds, no new errors", tone: "var(--green)" },
   refused: { text: "Said no. It would break 2 places, so nothing changed", tone: "var(--red)" },
 };
 
@@ -99,7 +99,7 @@ function Hero() {
         >
           Paste a GitHub repo. Twins finds the code your AI wrote more than once
           and keeps one copy, so a fix lands everywhere. It only makes the change
-          if your app still works.
+          if your app still builds with no new errors.
         </p>
         <div className="tw-hero-in mt-8 flex flex-wrap justify-center gap-3" style={{ animationDelay: "320ms" }}>
           <Link to="/map" className="tw-btn tw-btn-primary h-12 px-6 text-[15px]">
@@ -249,8 +249,8 @@ const STEPS = [
     d: "One click keeps one copy and points every place that used the others at it. Copies with small differences go to the assistant, which writes one version that fits them all.",
   },
   {
-    t: "Only if it still works",
-    d: "Twins tests the whole app on a private copy first. If nothing breaks, the merge is kept. If anything breaks, your code stays exactly as it was and you see what would have broken.",
+    t: "Only if it still builds",
+    d: "Twins installs, type checks and builds the whole app on a private copy first. No new errors and the merge is kept. Any new error and your code stays exactly as it was, and you see what would have broken.",
   },
   {
     t: "Ship the pull request",
@@ -549,7 +549,11 @@ function Agents() {
 const FAQ = [
   {
     q: "What counts as a copy?",
-    a: "Code that does the same job written in more than one place. Identical copies are fixed in one click. Similar copies with small differences go to the assistant, which writes one version that fits every use.",
+    a: "Top level functions and components, at least four lines long, written more than once in your repo. Identical copies are fixed in one click. Similar copies with small differences go to the assistant, which writes one version that fits every use. Test files, generated files and build output are skipped, and for now so are class methods.",
+  },
+  {
+    q: "Does the check prove my app behaves the same?",
+    a: "Not completely, and we would rather say so. It proves the merge adds no new type errors and that a build which passed before still passes. That catches the usual ways a merge breaks code, like a wrong argument or a changed return type, but a change in behaviour can still compile. That is why identical copies merge in one click and similar copies are shown side by side before you keep them.",
   },
   {
     q: "Does my code run on your server?",
@@ -688,7 +692,7 @@ export function Landing() {
             </div>
             <p className="mt-4 max-w-[320px] text-[14.5px] leading-relaxed text-[var(--paper-2)]">
               Finds the code your AI wrote twice and keeps one copy, only when your
-              app still works.
+              app still builds with no new errors.
             </p>
           </div>
           <div>
