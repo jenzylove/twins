@@ -250,7 +250,7 @@ const STEPS = [
   },
   {
     t: "Only if it still builds",
-    d: "Twins installs, type checks and builds the whole app on a private copy first. No new errors and the merge is kept. Any new error and your code stays exactly as it was, and you see what would have broken.",
+    d: "Twins installs, type checks and builds the whole app on a private copy first, and runs your tests if you have them. No new errors and the merge is kept. Any new error and your code stays exactly as it was, and you see what would have broken.",
   },
   {
     t: "Ship the pull request",
@@ -553,7 +553,7 @@ const FAQ = [
   },
   {
     q: "Does the check prove my app behaves the same?",
-    a: "Not completely, and we would rather say so. It proves the merge adds no new type errors and that a build which passed before still passes. That catches the usual ways a merge breaks code, like a wrong argument or a changed return type, but a change in behaviour can still compile. That is why identical copies merge in one click and similar copies are shown side by side before you keep them.",
+    a: "Not completely, and we would rather say so. It proves the merge adds no new type errors, that a build which passed before still passes, and, if your repo has tests that passed before, that they still pass. That catches the usual ways a merge breaks code, like a wrong argument or a changed return type. Without tests, a change in behaviour can still compile. That is why identical copies merge in one click and similar copies are shown side by side before you keep them.",
   },
   {
     q: "Does my code run on your server?",

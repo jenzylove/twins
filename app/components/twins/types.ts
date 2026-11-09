@@ -72,6 +72,7 @@ export type MapData = {
     errors: number;
     coverage: { covered: number; total: number; ratio: number };
     build?: { ran: boolean; ok: boolean; ms?: number } | null;
+    tests?: { ran: boolean; ok: boolean; ms?: number } | null;
   } | null;
   merges: MergeRecord[];
   metrics: {

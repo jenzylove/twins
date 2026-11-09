@@ -11,7 +11,7 @@ import {
   type FileEdit,
   type MergePlan,
 } from "../server/engine/merge.js";
-import { runCheck, writeFiles } from "../server/engine/sandbox.js";
+import { runCheck, runTests, writeFiles } from "../server/engine/sandbox.js";
 import {
   applyToDisk,
   callerLabel,
@@ -36,7 +36,7 @@ const MIN_COVERAGE = 0.6;
 
 export default defineAction({
   description:
-    "Merge a set of duplicate copies into one shared file, but only if the type check does not get worse. Without edits it plans the merge deterministically (exact copies). With edits (an agent-written merge for near copies: see compare-twins, and read-repo-file for the whole current text of each file you change) it applies them as given. Either way the edits are written to the sandbox and re-checked; if the merge adds any type error, or breaks a passing build, it is reverted, recorded as refused, and the action fails with merge_refused and the added errors. Nothing changes on a refusal.",
+    "Merge a set of duplicate copies into one shared file, but only if the type check does not get worse. Without edits it plans the merge deterministically (exact copies). With edits (an agent-written merge for near copies: see compare-twins, and read-repo-file for the whole current text of each file you change) it applies them as given. Either way the edits are written to the sandbox and re-checked; if the merge adds any type error, breaks a passing build, or makes the repo's own tests fail when they passed at baseline, it is reverted, recorded as refused, and the action fails with merge_refused and the added errors. Nothing changes on a refusal.",
   schema: z.object({
     repoId: z.string().describe("Repo id returned by import-repo"),
     setId: z.string().describe("Copy set id from find-twins"),
@@ -227,10 +227,26 @@ export default defineAction({
         message: cleanDiagMessage(d.message),
       }));
       const buildBroke = withBuild && !!after.build?.ran && !after.build.ok;
+      // The repo's own tests, only when they passed at baseline.
+      let testsBroke = false;
+      let testsTail: string | undefined;
+      if (added.length === 0 && !buildBroke && baseline.tests?.ran && baseline.tests.ok) {
+        let tests;
+        try {
+          tests = await engine(() => runTests(sandboxId));
+        } catch (err) {
+          await writeFiles(sandboxId, plan.edits.map(restore)).catch(
+            () => undefined,
+          );
+          throw err;
+        }
+        testsBroke = !tests.ok;
+        testsTail = tests.tail;
+      }
       const mergeId = crypto.randomUUID();
 
       // 3. Refuse: restore, record the row, then fail.
-      if (added.length > 0 || buildBroke) {
+      if (added.length > 0 || buildBroke || testsBroke) {
         await writeFiles(sandboxId, plan.edits.map(restore));
         const shown = 5;
         const listed = added
@@ -241,7 +257,9 @@ export default defineAction({
           added.length > shown ? ` (and ${added.length - shown} more)` : "";
         const message =
           added.length === 0
-            ? "Twins said no: this merge breaks the build, which passed before. Nothing was changed."
+            ? buildBroke
+              ? "Twins said no: this merge breaks the build, which passed before. Nothing was changed."
+              : `Twins said no: this merge makes the repo's own tests fail, and they passed before. Nothing was changed.${testsTail ? ` Test output: ${testsTail.slice(-300)}` : ""}`
             : `Twins said no: this merge adds ${added.length} type error${added.length === 1 ? "" : "s"} the baseline does not have: ${listed}${more}. Nothing was changed.`;
         await getDb()
           .insert(schema.merges)
@@ -276,6 +294,7 @@ export default defineAction({
               message: d.message,
             })),
             buildBroke,
+            testsBroke,
           },
         });
       }

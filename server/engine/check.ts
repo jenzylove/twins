@@ -9,6 +9,8 @@ export type CheckResult = {
   coveredFiles: string[];
   ms: number;
   build?: { ran: boolean; ok: boolean; ms: number; tail?: string };
+  /** The repo's own test script, run with the network off. */
+  tests?: { ran: boolean; ok: boolean; ms: number; tail?: string };
 };
 
 export const MIN_COVERAGE = 0.6;

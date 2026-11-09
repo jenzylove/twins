@@ -103,6 +103,7 @@ export async function prepareSandbox(
   targets: string[],
   hasBuild: boolean,
   onStage: (stage: string) => void = () => undefined,
+  hasTests = false,
 ): Promise<CheckResult> {
   const sbx = await getSandbox(sandboxId);
   let checkerDone = false;
@@ -179,12 +180,49 @@ npm install --prefix /tmp/checker @typescript/native-preview --no-audit --no-fun
   }
   onStage(hasBuild ? "building" : "type checking baseline");
   const first = await runCheck(sandboxId, targets, hasBuild);
-  if (!first.build?.ran) return first;
-  onStage("type checking baseline");
-  // The build can generate files (route trees, codegen) that the type check
-  // needs, so take the baseline diagnostics again now that it has run.
-  const settled = await runCheck(sandboxId, targets, false);
-  return { ...settled, ms: first.ms + settled.ms, build: first.build };
+  let result: CheckResult = first;
+  if (first.build?.ran) {
+    onStage("type checking baseline");
+    // The build can generate files (route trees, codegen) that the type check
+    // needs, so take the baseline diagnostics again now that it has run.
+    const settled = await runCheck(sandboxId, targets, false);
+    result = { ...settled, ms: first.ms + settled.ms, build: first.build };
+  }
+  if (hasTests) {
+    onStage("running the repo's tests");
+    result = { ...result, tests: await runTests(sandboxId) };
+  }
+  return result;
+}
+
+/**
+ * Run the repo's own test script once, network off (the sandbox is already cut
+ * off). A suite that fails or never finishes at baseline is simply not used.
+ */
+export async function runTests(
+  sandboxId: string,
+): Promise<NonNullable<CheckResult["tests"]>> {
+  const sbx = await getSandbox(sandboxId);
+  const t0 = Date.now();
+  try {
+    const r = await sh(sbx, "npm test", {
+      timeoutMs: 180_000,
+      env: { CI: "1" },
+    });
+    return {
+      ran: true,
+      ok: r.code === 0,
+      ms: Date.now() - t0,
+      ...(r.code === 0 ? {} : { tail: (r.err || r.out).slice(-500) }),
+    };
+  } catch (err) {
+    return {
+      ran: true,
+      ok: false,
+      ms: Date.now() - t0,
+      tail: `tests did not finish: ${String(err).slice(0, 200)}`,
+    };
+  }
 }
 
 export async function runCheck(

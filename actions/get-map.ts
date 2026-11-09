@@ -82,6 +82,10 @@ export default defineAction({
         build: z
           .object({ ran: z.boolean(), ok: z.boolean(), ms: z.number() })
           .nullable(),
+        tests: z
+          .object({ ran: z.boolean(), ok: z.boolean(), ms: z.number() })
+          .nullable()
+          .optional(),
         checkMs: z.number(),
       })
       .nullable(),
@@ -157,6 +161,13 @@ export default defineAction({
                   ran: baseline.build.ran,
                   ok: baseline.build.ok,
                   ms: baseline.build.ms,
+                }
+              : null,
+            tests: baseline.tests
+              ? {
+                  ran: baseline.tests.ran,
+                  ok: baseline.tests.ok,
+                  ms: baseline.tests.ms,
                 }
               : null,
             checkMs: baseline.ms,

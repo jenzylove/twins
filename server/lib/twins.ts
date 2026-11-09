@@ -302,6 +302,19 @@ export async function rescan(row: RepoRow, dir: string): Promise<StoredScan> {
   return stored;
 }
 
+/** A real `test` script, not npm's placeholder that always fails. */
+export function hasTestScript(dir: string): boolean {
+  try {
+    const pkg = JSON.parse(
+      fs.readFileSync(path.join(dir, "package.json"), "utf8"),
+    );
+    const t = pkg?.scripts?.test;
+    return typeof t === "string" && t.trim() !== "" && !/no test specified/i.test(t);
+  } catch {
+    return false;
+  }
+}
+
 export function hasBuildScript(dir: string): boolean {
   try {
     const pkg = JSON.parse(
@@ -368,7 +381,13 @@ async function doPrepare(row: RepoRow): Promise<void> {
       .update(schema.repos)
       .set({ sandboxId, hasBuild, updatedAt: nowIso() })
       .where(eq(schema.repos.id, row.id));
-    const result = await prepareSandbox(sandboxId, targets, hasBuild, stage);
+    const result = await prepareSandbox(
+      sandboxId,
+      targets,
+      hasBuild,
+      stage,
+      hasTestScript(dir),
+    );
     const priorBaseline = row.baselineJson
       ? (JSON.parse(row.baselineJson) as Baseline)
       : null;

@@ -103,9 +103,11 @@ export function MapView({ repoId }: { repoId: string }) {
     if (who !== "you") {
       if (m.status === "refused") {
         toast.error(`${capital(who)} tried to merge ${set.name}. Twins said no.`, {
-          description: m.added
+          description: m.added?.length
             ? `It would have broken your app in ${m.added.length} ${m.added.length === 1 ? "place" : "places"}. Nothing changed.`
-            : "It would have broken your app. Nothing changed.",
+            : /tests fail/.test(m.summary)
+              ? "It would have made your tests fail. Nothing changed."
+              : "It would have broken the build. Nothing changed.",
         });
       } else {
         toast.success(`${capital(who)} merged ${set.name}. Still builds, no new errors.`, { position: "top-center" });
@@ -270,6 +272,7 @@ function TopStrip({ data }: { data: MapData }) {
                       ? "Builds with no errors."
                       : "No type errors."
                     : `Builds, with ${formatNumber(baseline.errors)} known ${baseline.errors === 1 ? "error" : "errors"}.`}
+                  {baseline.tests?.ran && baseline.tests.ok ? " Tests pass." : ""}
                 </span>
                 <span className="mt-0.5 block text-[12px] text-[var(--paper-3)]">
                   Every merge must keep it this way.{" "}
@@ -280,6 +283,11 @@ function TopStrip({ data }: { data: MapData }) {
                 {formatNumber(baseline.errors)} type errors · {formatNumber(baseline.coverage.covered)} of{" "}
                 {formatNumber(baseline.coverage.total)} files type checked
                 {baseline.build?.ran ? ` · build ${baseline.build.ok ? "passes" : "fails"}` : ""}
+                {baseline.tests?.ran
+                  ? baseline.tests.ok
+                    ? " · tests pass"
+                    : " · tests already fail, so they are not used"
+                  : " · no test script"}
               </p>
             </details>
           ) : (
@@ -624,7 +632,12 @@ function ComparePanel({
         ) : null}
       </div>
 
-      {refusedErrors ? <Refusal errors={refusedErrors} /> : null}
+      {refusedErrors ? (
+        <Refusal
+          errors={refusedErrors}
+          reason={outcome?.status === "refused" ? outcome.message : (latest?.summary ?? "")}
+        />
+      ) : null}
 
       <div className="min-h-0 flex-1 overflow-auto">
         {merged ? (
@@ -706,7 +719,7 @@ function CodeBlock({ code, start, differs }: { code: string; start: number; diff
   );
 }
 
-function Refusal({ errors }: { errors: Diag[] }) {
+function Refusal({ errors, reason }: { errors: Diag[]; reason: string }) {
   return (
     <div
       className="tw-fade-in border-b px-4 py-3 md:px-5"
@@ -716,7 +729,11 @@ function Refusal({ errors }: { errors: Diag[] }) {
       <p className="flex flex-wrap items-baseline gap-x-3 text-[13px]">
         <span className="tw-mono font-bold tracking-[0.12em] text-[var(--red)]">SAID NO</span>
         <span className="text-[var(--paper)]">
-          This merge would break your app in {errors.length} {errors.length === 1 ? "place" : "places"}.
+          {errors.length > 0
+            ? `This merge would break your app in ${errors.length} ${errors.length === 1 ? "place" : "places"}.`
+            : /tests fail/.test(reason)
+              ? "This merge makes your tests fail, and they passed before."
+              : "This merge breaks the build, which passed before."}
         </span>
         <span className="text-[var(--paper-3)]">Nothing changed. Your code is as it was.</span>
       </p>
@@ -942,7 +959,11 @@ function TimelineRow({
         {m.status === "refused" ? (
           <span>
             {m.added
-              ? `would break ${m.added.length} ${m.added.length === 1 ? "place" : "places"}, nothing changed`
+              ? m.added.length > 0
+                ? `would break ${m.added.length} ${m.added.length === 1 ? "place" : "places"}, nothing changed`
+                : /tests fail/.test(m.summary)
+                  ? "tests would fail, nothing changed"
+                  : "build would fail, nothing changed"
               : "would break the app, nothing changed"}
           </span>
         ) : null}
