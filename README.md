@@ -12,7 +12,7 @@
 <p align="center">
   <a href="https://twins.jdollar.site"><img alt="Live site" src="https://img.shields.io/badge/live-twins.jdollar.site-4a2cff?style=flat-square" /></a>
   <a href="https://clips.agent-native.com/share/iCzMWhKTryvW"><img alt="Demo video" src="https://img.shields.io/badge/demo-watch%20on%20Clips-141311?style=flat-square" /></a>
-  <a href="https://github.com/jenzylove/nectarpay-crm/pull/1"><img alt="Real pull request" src="https://img.shields.io/badge/proof-pull%20request%20opened%20by%20Twins-0e8f61?style=flat-square" /></a>
+  <a href="https://github.com/jenzylove/nectarpay-crm/pull/2"><img alt="Real pull request, merged" src="https://img.shields.io/badge/proof-pull%20request%20opened%20by%20Twins%2C%20merged-0e8f61?style=flat-square" /></a>
   <img alt="Built for the Builder.io Agent-Native Hackathon" src="https://img.shields.io/badge/built%20for-Agent--Native%20Hackathon-f2f1ed?style=flat-square&labelColor=141311" />
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-e1ded6?style=flat-square" /></a>
   <a href="https://x.com/dollar782"><img alt="X" src="https://img.shields.io/badge/X-@dollar782-141311?style=flat-square" /></a>
@@ -29,7 +29,7 @@
 | Try it | [twins.jdollar.site](https://twins.jdollar.site), sign in and paste any public TypeScript repo (or JavaScript with a jsconfig.json) |
 | See a real map, no account | [twins.jdollar.site/sample](https://twins.jdollar.site/sample): a recorded real run, read only, with the kept merge and the merge Claude Code got blocked on |
 | Watch it | [Demo on Clips](https://clips.agent-native.com/share/iCzMWhKTryvW), 1 min 40 s |
-| See a real result | [Pull request Twins opened](https://github.com/jenzylove/nectarpay-crm/pull/1) on a fork of an app built with an AI app builder |
+| See a real result | [Pull request Twins opened, then merged](https://github.com/jenzylove/nectarpay-crm/pull/2) on a fork of an app built with an AI app builder: 4 files, +26 −76 |
 | Connect your agent | `npx @agent-native/core@latest connect https://twins.jdollar.site --client claude-code` (also `codex`, `cursor`, `github-copilot`, `opencode`) |
 | Any other MCP app | `https://twins.jdollar.site/_agent-native/mcp` |
 | How it is built | [docs/ENGINE_SPEC.md](docs/ENGINE_SPEC.md), [docs/BUILD_LOG.md](docs/BUILD_LOG.md) |

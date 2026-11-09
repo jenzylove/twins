@@ -33,7 +33,7 @@ Every tool result also ends with an **Open the map in Twins** link to that repo'
 **Find the copies**
 
 ```text
-Use Twins to import https://github.com/jenzylove/nectarpay-crm and tell me which code was written more than once. Wait for the map to be ready.
+Use Twins to import https://github.com/cmonson66/nectarpay-crm and tell me which code was written more than once. Wait for the map to be ready.
 ```
 
 **A merge Twins keeps**
@@ -42,7 +42,7 @@ Use Twins to import https://github.com/jenzylove/nectarpay-crm and tell me which
 In that repo, merge the exact copies of createSupabaseFetch with Twins and tell me the numbers it reports.
 ```
 
-Claude Code gets back one line such as:
+Claude Code gets back one line such as (your numbers depend on the commit you import):
 
 ```text
 Kept: merged createSupabaseFetch into src/integrations/supabase/create-supabase-fetch.ts. 76 lines removed, 27 added; duplicate lines 67 to 29; type check 0 errors vs 0 at baseline; checked in 14.0s.
