@@ -104,11 +104,11 @@ export function MapView({ repoId }: { repoId: string }) {
       if (m.status === "refused") {
         toast.error(`${capital(who)} tried to merge ${set.name}. Twins said no.`, {
           description: m.added
-            ? `${m.added.length} new type ${m.added.length === 1 ? "error" : "errors"}. Undone automatically.`
-            : "The check got worse, so it was undone automatically.",
+            ? `It would have broken your app in ${m.added.length} ${m.added.length === 1 ? "place" : "places"}. Nothing changed.`
+            : "It would have broken your app. Nothing changed.",
         });
       } else {
-        toast.success(`${capital(who)} merged ${set.name}. Still builds.`, { position: "top-center" });
+        toast.success(`${capital(who)} merged ${set.name}. Your app still works.`, { position: "top-center" });
       }
     }
   }, [data]);
@@ -255,27 +255,33 @@ function TopStrip({ data }: { data: MapData }) {
         <AgentToggleButton />
       </div>
       <div className="flex items-end gap-6 self-end md:gap-10 md:self-auto md:pr-10">
-        <div className="hidden sm:block">
-          <p className="tw-label">Baseline</p>
+        <div className="hidden max-w-[260px] sm:block">
+          <p className="tw-label">Your app today</p>
           {baseline ? (
-            <p className="tw-mono mt-1 text-[12px] leading-5 text-[var(--paper-2)]">
-              <span className="text-[var(--paper)]">{formatNumber(baseline.errors)}</span>{" "}
-              type errors
-              <br />
-              <span className="text-[var(--paper)]">
-                {formatNumber(baseline.coverage.covered)} of {formatNumber(baseline.coverage.total)}
-              </span>{" "}
-              files checked
-              {baseline.build?.ran ? (
-                <>
-                  <br />
-                  build{" "}
-                  <span style={{ color: baseline.build.ok ? "var(--green)" : "var(--red)" }}>
-                    {baseline.build.ok ? "passes" : "fails"}
-                  </span>
-                </>
-              ) : null}
-            </p>
+            <details className="group mt-1">
+              <summary className="cursor-pointer list-none text-[14px] leading-5 text-[var(--paper)]">
+                <span className="flex items-center gap-2">
+                  <span
+                    className="size-1.5 shrink-0 rounded-full"
+                    style={{ background: baseline.errors === 0 && baseline.build?.ok !== false ? "var(--green)" : "var(--amber)" }}
+                  />
+                  {baseline.errors === 0
+                    ? baseline.build?.ran && baseline.build.ok
+                      ? "Works. Builds with no errors."
+                      : "Works. No errors."
+                    : `Works, with ${formatNumber(baseline.errors)} known ${baseline.errors === 1 ? "issue" : "issues"}.`}
+                </span>
+                <span className="mt-0.5 block text-[12px] text-[var(--paper-3)]">
+                  Every merge must keep it this way.{" "}
+                  <span className="underline decoration-[var(--hair-3)] underline-offset-2 group-open:hidden">Details</span>
+                </span>
+              </summary>
+              <p className="tw-mono mt-1.5 text-[11px] leading-5 text-[var(--paper-3)]">
+                {formatNumber(baseline.errors)} type errors · {formatNumber(baseline.coverage.covered)} of{" "}
+                {formatNumber(baseline.coverage.total)} files type checked
+                {baseline.build?.ran ? ` · build ${baseline.build.ok ? "passes" : "fails"}` : ""}
+              </p>
+            </details>
           ) : (
             <p className="tw-mono mt-1 text-[12px] text-[var(--paper-3)]">
               {status === "failed" ? "not recorded" : "recording…"}
@@ -283,7 +289,7 @@ function TopStrip({ data }: { data: MapData }) {
           )}
         </div>
         <div className="text-right">
-          <p className="tw-label">Duplicate lines</p>
+          <p className="tw-label">Lines written twice</p>
           <p className="mt-1 flex items-baseline justify-end gap-3">
             {saved > 0 ? (
               <span className="tw-mono text-[15px] text-[var(--paper-3)] line-through decoration-[var(--paper-3)]">
@@ -296,7 +302,7 @@ function TopStrip({ data }: { data: MapData }) {
             />
           </p>
           <p className="tw-mono mt-1 text-[11px] text-[var(--paper-3)]">
-            {metrics.kept} kept · {metrics.refused} said no
+            {metrics.kept} merged safely · {metrics.refused} blocked
           </p>
         </div>
       </div>
@@ -310,7 +316,7 @@ function StatusLine({ data }: { data: MapData }) {
     return (
       <p className="mt-2 flex items-center gap-2 text-[13px] text-[var(--paper-2)]">
         <span className="size-1.5 rounded-full bg-[var(--green)] shadow-[0_0_8px_var(--green)]" />
-        Sandbox ready. Every merge is type checked against the baseline.
+        Ready. Every merge is tried on a private copy of your app first.
       </p>
     );
   }
@@ -369,7 +375,7 @@ function Legend() {
       </span>
       <span className="flex items-center gap-1.5">
         <span className="inline-block size-2.5 border border-[var(--amber)] bg-[rgba(74,44,255,0.3)] shadow-[0_0_6px_rgba(74,44,255,0.35)]" />
-        HOLDS A COPY
+        CODE WRITTEN MORE THAN ONCE
       </span>
     </div>
   );
@@ -398,10 +404,10 @@ function SetRail({
     <div className="flex min-h-0 flex-col @4xl:flex-[1.3]">
       <div className="flex items-baseline justify-between px-5 pb-3 pt-5">
         <h2 className="tw-display text-[28px]">
-          {ranked.length} {ranked.length === 1 ? "set" : "sets"} of copies
+          {ranked.length} {ranked.length === 1 ? "thing" : "things"} written twice
         </h2>
         {mergedCount > 0 ? (
-          <span className="tw-mono text-[11px] text-[var(--green)]">{mergedCount} merged</span>
+          <span className="tw-mono text-[11px] text-[var(--green)]">{mergedCount} fixed</span>
         ) : null}
       </div>
       <div
@@ -437,7 +443,7 @@ function SetRail({
                 {s.name}
               </span>
               <span className="mt-0.5 flex items-center gap-2 text-[11.5px] text-[var(--paper-3)]">
-                <span>{s.members.length} copies</span>
+                <span>written {s.members.length} times</span>
                 <span aria-hidden>·</span>
                 <KindBadge set={s} />
                 {s.isComponent ? (
@@ -470,9 +476,13 @@ function KindBadge({ set }: { set: TwinSet }) {
         color: exact ? "var(--amber)" : "var(--paper-2)",
         border: `1px solid ${exact ? "var(--accent)" : "var(--hair-3)"}`,
       }}
-      title={exact ? "Same code, same dependencies" : "Same shape, small differences"}
+      title={
+        exact
+          ? "Identical copies. A fix in one will not reach the others."
+          : "Same shape with small changes. Merging keeps one shared version that serves every caller."
+      }
     >
-      {exact ? "EXACT" : "NEAR"}
+      {exact ? "IDENTICAL" : "SIMILAR"}
     </span>
   );
 }
@@ -535,6 +545,11 @@ function ComparePanel({
   }
 
   const canOneClick = set.mergeable && !merged;
+  const differs = useMemo(
+    () => (set.kind === "exact" ? new Map<string, Set<number>>() : driftLines(compare.data?.members ?? [])),
+    [compare.data, set.kind],
+  );
+  const drift = Math.max(0, ...[...differs.values()].map((s) => s.size));
 
   return (
     <div className="tw-fade-in flex max-h-[48vh] min-h-[220px] shrink-0 flex-col border-t border-[var(--hair-2)] bg-[var(--ink-2)] @4xl:max-h-[46%]">
@@ -544,14 +559,19 @@ function ComparePanel({
             <h3 className="tw-mono truncate text-[15px] text-[var(--amber)]">{set.name}</h3>
             <KindBadge set={set} />
           </div>
-          <p className="mt-0.5 line-clamp-2 text-[12px] text-[var(--paper-3)]">
-            {set.members.length} copies · {formatNumber(set.duplicateLines)} duplicate lines
-            {set.reason && !merged ? ` · ${set.reason}` : ""}
+          <p className="mt-0.5 line-clamp-2 text-[12.5px] text-[var(--paper-2)]">
+            {merged
+              ? "One copy now. Fix it once and the fix reaches every place it is used."
+              : set.kind === "exact"
+                ? `Written ${set.members.length} times, word for word. Fix a bug in one and the other ${set.members.length - 1 === 1 ? "copy keeps" : `${set.members.length - 1} keep`} it.`
+                : drift > 0
+                  ? `Written ${set.members.length} times with ${drift} ${drift === 1 ? "line" : "lines"} changed (highlighted). Fix the shared part in one and the other will not get it.`
+                  : `Written ${set.members.length} times with small changes. Fix the shared part in one and the other will not get it.`}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {merged ? (
-            <span className="tw-mono text-[12px] text-[var(--green)]">Merged · still builds</span>
+            <span className="tw-mono text-[12px] text-[var(--green)]">One copy · app still works</span>
           ) : (
             <>
               <button
@@ -572,9 +592,9 @@ function ComparePanel({
                 >
                   <IconGitMerge className="size-4" strokeWidth={1.8} />
                   {pending
-                    ? "Checking the build…"
+                    ? "Testing your app…"
                     : ready
-                      ? `Merge ${set.members.length} copies`
+                      ? "Keep one copy"
                       : retryable
                         ? "Restart sandbox and merge"
                         : "Sandbox warming up"}
@@ -597,8 +617,8 @@ function ComparePanel({
               <div className="tw-scan absolute inset-0" />
             </div>
             <p className="tw-mono mt-2 text-[11px] text-[var(--paper-3)]">
-              Writing one shared file, rewiring callers, then type checking{" "}
-              {data.baseline ? `${formatNumber(data.baseline.coverage.covered)} files` : "the app"} against the baseline
+              Writing one shared copy, pointing every caller at it, then testing{" "}
+              {data.baseline ? `all ${formatNumber(data.baseline.coverage.covered)} files` : "the app"} on a private copy of your app
             </p>
           </div>
         ) : null}
@@ -608,9 +628,12 @@ function ComparePanel({
 
       <div className="min-h-0 flex-1 overflow-auto">
         {merged ? (
-          <p className="px-5 py-6 text-[13px] text-[var(--paper-2)]">
-            These copies now live in one shared file. Undo it from the history if you change your mind.
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-6">
+            <p className="max-w-md text-[13px] text-[var(--paper-2)]">
+              These copies now live in one shared file, and your app still works. Send it to your repo
+              as a pull request below, or undo it from the history.
+            </p>
+          </div>
         ) : compare.isLoading ? (
           <div className="px-5 py-6">
             <p className="tw-label">Reading the copies</p>
@@ -626,15 +649,18 @@ function ComparePanel({
               gridTemplateColumns: `repeat(${compare.data?.members.length ?? set.members.length}, minmax(300px, 1fr))`,
             }}
           >
-            {(compare.data?.members ?? []).map((m) => (
+            {(compare.data?.members ?? []).map((m, mi) => (
               <div key={m.id} className="min-w-0 overflow-x-auto">
                 <div className="tw-mono sticky top-0 z-[1] truncate border-b border-[var(--hair)] bg-[var(--ink-2)] px-4 py-2 text-[11px] text-[var(--paper-2)]">
+                  <span className="mr-2 inline-flex size-4 items-center justify-center rounded-full bg-[var(--accent)] text-[9.5px] font-bold text-[var(--accent-ink)]">
+                    {mi + 1}
+                  </span>
                   {m.path}
                   <span className="text-[var(--paper-3)]">
                     :{m.line}–{m.endLine}
                   </span>
                 </div>
-                <CodeBlock code={m.code} start={m.line} />
+                <CodeBlock code={m.code} start={m.line} differs={differs.get(m.id)} />
               </div>
             ))}
           </div>
@@ -644,12 +670,32 @@ function ComparePanel({
   );
 }
 
-function CodeBlock({ code, start }: { code: string; start: number }) {
+/** Lines (by index) that do not appear in every other copy: where the copies drifted. */
+function driftLines(members: { id: string; code: string }[]) {
+  const norm = (l: string) => l.trim().replace(/\s+/g, " ");
+  const sets = members.map((m) => new Set(m.code.split("\n").map(norm).filter(Boolean)));
+  const out = new Map<string, Set<number>>();
+  members.forEach((m, mi) => {
+    const idx = new Set<number>();
+    m.code.split("\n").forEach((l, i) => {
+      const n = norm(l);
+      if (n && n.length > 1 && sets.some((s, si) => si !== mi && !s.has(n))) idx.add(i);
+    });
+    out.set(m.id, idx);
+  });
+  return out;
+}
+
+function CodeBlock({ code, start, differs }: { code: string; start: number; differs?: Set<number> | undefined }) {
   const lines = code.replace(/\s+$/, "").split("\n");
   return (
     <pre className="tw-code min-w-max px-0 py-2 text-[var(--paper-2)]">
       {lines.map((l, i) => (
-        <div key={i} className="flex hover:bg-[rgba(20,19,17,0.04)]">
+        <div
+          key={i}
+          className="flex hover:bg-[rgba(20,19,17,0.04)]"
+          style={differs?.has(i) ? { background: "rgba(74,44,255,0.1)", boxShadow: "inset 2px 0 0 var(--accent)" } : undefined}
+        >
           <span className="w-11 shrink-0 select-none pr-3 text-right text-[var(--paper-3)] opacity-60">
             {start + i}
           </span>
@@ -670,11 +716,15 @@ function Refusal({ errors }: { errors: Diag[] }) {
       <p className="flex flex-wrap items-baseline gap-x-3 text-[13px]">
         <span className="tw-mono font-bold tracking-[0.12em] text-[var(--red)]">SAID NO</span>
         <span className="text-[var(--paper)]">
-          This merge added {errors.length} new type {errors.length === 1 ? "error" : "errors"}.
+          This merge would break your app in {errors.length} {errors.length === 1 ? "place" : "places"}.
         </span>
-        <span className="text-[var(--paper-3)]">Undone automatically. Your code is as it was.</span>
+        <span className="text-[var(--paper-3)]">Nothing changed. Your code is as it was.</span>
       </p>
       {errors.length > 0 ? (
+        <details className="mt-1.5">
+          <summary className="cursor-pointer text-[12px] text-[var(--paper-3)] underline decoration-[var(--hair-3)] underline-offset-2">
+            Show what would break
+          </summary>
         <ul className="tw-mono mt-2 space-y-1 text-[11.5px]">
           {errors.slice(0, 8).map((d, i) => (
             <li key={i} className="flex gap-3">
@@ -690,6 +740,7 @@ function Refusal({ errors }: { errors: Diag[] }) {
             <li className="text-[var(--paper-3)]">and {errors.length - 8} more</li>
           ) : null}
         </ul>
+        </details>
       ) : null}
     </div>
   );
@@ -825,11 +876,11 @@ function Timeline({
             type="button"
             onClick={() => void openPr()}
             disabled={opening || kept === 0}
-            className="tw-btn tw-btn-ghost h-9"
+            className={`tw-btn ${kept > 0 ? "tw-btn-primary" : "tw-btn-ghost"} h-9`}
             title="Fork the repo to your GitHub and open a pull request with the kept merges"
           >
             <IconExternalLink className="size-4" strokeWidth={1.8} />
-            {opening ? "Opening pull request…" : "Open pull request"}
+            {opening ? "Opening pull request…" : "Send to my repo"}
           </button>
         )}
       </div>
@@ -861,7 +912,7 @@ function TimelineRow({
     m.status === "kept"
       ? "kept"
       : m.status === "refused"
-        ? "said no"
+        ? "blocked"
         : m.status === "checking"
           ? "checking"
           : "undone";
@@ -891,8 +942,8 @@ function TimelineRow({
         {m.status === "refused" ? (
           <span>
             {m.added
-              ? `${m.added.length} new ${m.added.length === 1 ? "error" : "errors"}, undone`
-              : "undone automatically"}
+              ? `would break ${m.added.length} ${m.added.length === 1 ? "place" : "places"}, nothing changed`
+              : "would break the app, nothing changed"}
           </span>
         ) : null}
         {m.status === "kept" ? (

@@ -83,6 +83,8 @@ export async function createRepoSandbox(info: {
       runtime: "node22",
       resources: { vcpus: 4 },
       timeout: SANDBOX_TIMEOUT_MS,
+      // Throwaway check boxes: never keep a snapshot when they stop.
+      persistent: false,
       ...credentials(),
     });
     return { sandboxId: sbx.name };

@@ -421,6 +421,23 @@ export function BlueprintMap({
         </svg>
       ) : null}
 
+      {!quiet && focusSet && arcs && "pts" in arcs && !event
+        ? arcs.pts.map((p, i) => (
+            <div
+              key={`copy-${focusSet.id}-${i}`}
+              className="tw-mono tw-fade-in pointer-events-none absolute z-[5] flex size-[18px] items-center justify-center rounded-full text-[10px] font-bold"
+              style={{
+                left: p.x + 6 + (i % 2) * 2,
+                top: p.y - 22 - (i % 2) * 4,
+                background: "var(--accent)",
+                color: "var(--accent-ink)",
+                boxShadow: "0 0 0 2px var(--ink), 0 6px 18px -6px rgba(74,44,255,0.8)",
+              }}
+            >
+              {i + 1}
+            </div>
+          ))
+        : null}
       {event?.kind === "refused" && eventCenter ? (
         <div
           key={`stamp-${event.key}`}
@@ -446,7 +463,7 @@ export function BlueprintMap({
             border: "1px solid rgba(14,143,97,0.55)",
           }}
         >
-          KEPT · STILL BUILDS
+          ONE COPY · APP STILL WORKS
         </div>
       ) : null}
 
