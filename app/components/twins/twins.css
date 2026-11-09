@@ -461,7 +461,7 @@
 .tw-said-stamp {
   position: absolute;
   right: 0;
-  top: -8px;
+  bottom: -88px;
   font-family: var(--font-mono);
   font-weight: 700;
   font-size: 26px;
