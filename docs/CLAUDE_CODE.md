@@ -33,7 +33,7 @@ Every tool result also ends with an **Open the map in Twins** link to that repo'
 **Find the copies**
 
 ```text
-Use Twins to import https://github.com/cmonson66/nectarpay-crm and tell me which code was written more than once. Wait for the map to be ready.
+Use Twins to import https://github.com/jenzylove/nectarpay-crm and tell me which code was written more than once. Wait for the map to be ready.
 ```
 
 **A merge Twins keeps**
@@ -45,7 +45,7 @@ In that repo, merge the exact copies of createSupabaseFetch with Twins and tell 
 Claude Code gets back one line such as:
 
 ```text
-Kept: merged createSupabaseFetch into src/integrations/supabase/create-supabase-fetch.ts. 76 lines removed, 27 added; duplicate lines 59 to 21; type check 0 errors vs 0 at baseline; checked in 13.8s.
+Kept: merged createSupabaseFetch into src/integrations/supabase/create-supabase-fetch.ts. 76 lines removed, 27 added; duplicate lines 67 to 29; type check 0 errors vs 0 at baseline; checked in 14.0s.
 ```
 
 **A merge Twins refuses**
@@ -57,7 +57,7 @@ Merge qrToDataURL and qrToString in src/lib/qr.ts yourself. Write a new src/lib/
 The helper returns a string where it promised a number, so the type check gets worse. Twins refuses and Claude Code receives a tool error like this:
 
 ```text
-Twins said no: this merge adds 1 type error the baseline does not have: src/lib/qr-shared.ts:2 TS2322 Type 'string' is not assignable to type 'number'. Nothing was changed. (errorCode: merge_refused)
+Twins said no: this merge adds 4 type errors the baseline does not have: src/lib/qr-shared.ts:23 TS2322 Type 'string' is not assignable to type 'number'; src/lib/qr-shared.ts:24 TS2322 Type 'string' is not assignable to type 'number'; src/lib/qr.ts:8 TS2322 Type 'number' is not assignable to type 'string'; src/lib/qr.ts:15 TS2322 Type 'number' is not assignable to type 'string'. Nothing was changed. (errorCode: merge_refused)
 ```
 
 On the open map, SAID NO stamps across the files Claude Code touched. Nothing in the repo changed, and the refusal stays in the map's history.

@@ -74,7 +74,7 @@ const PHASE_LINE: Record<HeroPhase, { text: string; tone: string }> = {
   apart: { text: "formatDate, written twice in two files", tone: "var(--paper-3)" },
   joining: { text: "Keeping one copy, then testing the whole app", tone: "var(--accent)" },
   kept: { text: "Kept. Still builds, no new errors", tone: "var(--green)" },
-  refused: { text: "Said no. It would break 2 places, so nothing changed", tone: "var(--red)" },
+  refused: { text: "Said no. It would break the code, so nothing changed", tone: "var(--red)" },
 };
 
 function Hero() {
@@ -238,7 +238,7 @@ function MapDemo() {
 const STEPS = [
   {
     t: "Paste a repo",
-    d: "Any public GitHub link to a TypeScript or JavaScript app. Twins reads every file and first notes how healthy your app is today, so it can promise to never make it worse.",
+    d: "Any public GitHub link to a TypeScript app, or a JavaScript app with a jsconfig.json. Twins reads every file and first notes how healthy your app is today, so it can promise to never make it worse.",
   },
   {
     t: "See the copies",
@@ -368,45 +368,48 @@ function SaidNo() {
           The safety test
         </p>
         <h2 className="tw-display rv mt-6 text-[44px] md:text-[88px]">
-          Claude Code said done.
+          Claude Code sent it.
           <br />
           <span className="text-[#ff5a3d]">Twins said no.</span>
         </h2>
 
         <div className="mt-16 grid gap-12 md:grid-cols-2 md:gap-0">
           <div className="rv md:border-r md:border-[rgba(242,241,237,0.14)] md:pr-12">
-            <p className="tw-mono text-[11px] uppercase tracking-[0.14em] text-[rgba(242,241,237,0.45)]">What the agent said</p>
+            <p className="tw-mono text-[11px] uppercase tracking-[0.14em] text-[rgba(242,241,237,0.45)]">What the agent did</p>
             <div className="mt-6 space-y-5 text-[16px] leading-relaxed">
               <p>
                 <span className="tw-mono mr-3 text-[11px] uppercase tracking-[0.14em] text-[rgba(242,241,237,0.45)]">You</span>
-                <span className="text-[var(--ink)]">Merge every copy of createSupabaseFetch.</span>
+                <span className="text-[var(--ink)]">Merge qrToDataURL and qrToString into one helper.</span>
               </p>
               <p>
                 <span className="tw-mono mr-3 text-[11px] uppercase tracking-[0.14em] text-[#9d8cff]">Claude Code</span>
-                <span className="text-[var(--ink)]">Done. The three files now share one helper.</span>
+                <span className="text-[var(--ink)]">Wrote one shared qrTo helper in src/lib/qr-shared.ts, updated qr.ts, and sent the edit to Twins.</span>
               </p>
             </div>
             <p className="mt-8 text-[14px] text-[rgba(242,241,237,0.5)]">
-              It believes it. It never ran your app.
+              It never ran your app. For the demo we asked it for the wrong return type, so you can watch the test catch it.
             </p>
           </div>
           <div className="rv relative md:pl-12" style={{ transitionDelay: "450ms" }}>
             <p className="tw-mono text-[11px] uppercase tracking-[0.14em] text-[rgba(242,241,237,0.45)]">What Twins found, the same second</p>
             <p className="mt-6 text-[20px] leading-snug text-[var(--ink)]">
-              This would break your app in <span className="text-[#ff5a3d]">2 places.</span>
+              This would break your app in <span className="text-[#ff5a3d]">4 places.</span>
               <br />
               Nothing was changed.
             </p>
             <ul className="mt-6 space-y-4 text-[15px] text-[rgba(242,241,237,0.7)]">
               <li>
-                <span className="tw-mono block text-[12px] text-[#ff8a73]">client.server.ts, line 31</span>
-                The new helper needs two values. This file still sends one.
+                <span className="tw-mono block text-[12px] text-[#ff8a73]">qr-shared.ts, lines 23 and 24</span>
+                The new helper promises a number but hands back text.
               </li>
               <li>
-                <span className="tw-mono block text-[12px] text-[#ff8a73]">auth-middleware.ts, line 40</span>
-                A value that can be empty is now passed where an empty one breaks.
+                <span className="tw-mono block text-[12px] text-[#ff8a73]">qr.ts, lines 8 and 15</span>
+                qr.ts still promises text to its callers, and now gets a number.
               </li>
             </ul>
+            <p className="tw-mono mt-6 text-[11px] text-[rgba(242,241,237,0.4)]">
+              From the real run in the demo video, Nov 9 2026.
+            </p>
             <div className="tw-said-stamp" aria-hidden>
               SAID NO
             </div>
@@ -569,7 +572,7 @@ const FAQ = [
   },
   {
     q: "Which repos work?",
-    a: "Public TypeScript and JavaScript repos up to 200 MB, including ones with several apps inside. Private repos are not supported yet.",
+    a: "Public TypeScript repos up to 200 MB, including ones with several apps inside, and JavaScript repos that have a tsconfig.json or jsconfig.json. Twins can find copies in any JavaScript repo, but it only merges where it can check the code. Private repos are not supported yet.",
   },
   {
     q: "What do I get at the end?",

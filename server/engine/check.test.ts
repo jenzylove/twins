@@ -123,6 +123,7 @@ describe("checkTargets", () => {
     const plain = makeRepo({ "tsconfig.json": `{ "include": ["src"], "references": [{ "path": "./x.json" }] }` });
     expect(checkTargets(plain)).toEqual(["tsconfig.json"]);
     expect(checkTargets(makeRepo({ "a.js": "" }))).toEqual([]);
+    expect(checkTargets(makeRepo({ "a.js": "", "jsconfig.json": "{}" }))).toEqual(["jsconfig.json"]);
   });
 
   it("finds package configs in a monorepo with no root tsconfig", () => {

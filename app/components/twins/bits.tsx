@@ -40,10 +40,11 @@ export function callerLabel(caller: string): string {
   // Action callers: frontend, tool (built in agent), mcp[:client], cli, http...
   const c = caller.toLowerCase();
   if (c === "frontend" || c === "ui" || c === "you" || c.startsWith("mcp-widget")) return "you";
-  if (c.includes("claude")) return "Claude Code";
+  // Only Claude Code itself; Claude Desktop or claude.ai keep their own names.
+  if (/claude[\s_-]?code/.test(c)) return "Claude Code";
   if (c.startsWith("mcp")) {
-    const client = caller.slice(4).trim();
-    return client || "an MCP agent";
+    const client = caller.slice(4).trim().replace(/[-_]+/g, " ");
+    return client ? client.charAt(0).toUpperCase() + client.slice(1) : "an MCP agent";
   }
   if (c === "tool" || c === "agent" || c === "webmcp" || c === "a2a") return "agent";
   if (c === "cli") return "terminal";

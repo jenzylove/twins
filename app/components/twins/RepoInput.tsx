@@ -96,7 +96,7 @@ export function RepoInput() {
           </button>
         </div>
         <p className="tw-mono mt-16 max-w-xl text-[11.5px] leading-relaxed text-[var(--paper-3)]">
-          Public TypeScript and JavaScript repos, monorepos included. Your code is
+          Public TypeScript repos, monorepos included, and JavaScript with a jsconfig.json. Your code is
           read on our server and only ever runs inside an isolated sandbox.
         </p>
       </div>

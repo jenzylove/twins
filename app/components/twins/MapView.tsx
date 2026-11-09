@@ -275,7 +275,9 @@ function TopStrip({ data }: { data: MapData }) {
                   {baseline.tests?.ran && baseline.tests.ok ? " Tests pass." : ""}
                 </span>
                 <span className="mt-0.5 block text-[12px] text-[var(--paper-3)]">
-                  Every merge must keep it this way.{" "}
+                  {baseline.coverage.ratio < 0.6
+                    ? `Twins can only check ${Math.round(baseline.coverage.ratio * 100)}% of this code, so merging is off here. You can still see every copy. `
+                    : "Every merge must keep it this way. "}
                   <span className="underline decoration-[var(--hair-3)] underline-offset-2 group-open:hidden">Details</span>
                 </span>
               </summary>

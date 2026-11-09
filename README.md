@@ -26,7 +26,7 @@
 
 | | |
 | --- | --- |
-| Try it | [twins.jdollar.site](https://twins.jdollar.site), sign in and paste any public TypeScript or JavaScript repo |
+| Try it | [twins.jdollar.site](https://twins.jdollar.site), sign in and paste any public TypeScript repo (or JavaScript with a jsconfig.json) |
 | Watch it | [Demo on Clips](https://clips.agent-native.com/share/iCzMWhKTryvW), 1 min 40 s |
 | See a real result | [Pull request Twins opened](https://github.com/jenzylove/nectarpay-crm/pull/1) on a fork of an app built with an AI app builder |
 | Connect your agent | `npx @agent-native/core@latest connect https://twins.jdollar.site --client claude-code` (also `codex`, `cursor`, `github-copilot`, `opencode`) |
@@ -60,10 +60,10 @@ You ask your AI to fix a bug and it does. A week later the same bug is back some
 
 The safety test lives inside the merge action itself, not in the page. The page, the assistant inside Twins, and any connected coding agent all call the same action, so nobody can skip the test.
 
-In the demo, Claude Code is asked over MCP to merge two helpers with a deliberately wrong return type. It writes the edit, sends it, and believes it is done. Twins tries it, finds it would break the app in four places, and says no. Nothing in the repo changes.
+In the demo, Claude Code is asked over MCP to merge two helpers with a deliberately wrong return type. It writes the edit and sends it, expecting it to land. Twins tries it, finds it would break the app in four places, and says no. Nothing in the repo changes.
 
 <p align="center">
-  <img src="docs/media/said-no.png" alt="Claude Code said done. Twins said no." width="100%" />
+  <img src="docs/media/said-no.png" alt="Claude Code sent it. Twins said no." width="100%" />
 </p>
 
 ## How it uses Agent-Native
@@ -85,7 +85,7 @@ Every capability is one `defineAction` in [actions/](actions/), shared by every 
 
 ## Built with
 
-Agent-Native 0.224, React Router, three.js for the landing hero, ts-morph for the merges, the TypeScript compiler for the check, Vercel Sandbox for the private test machines, Postgres, and Railway for hosting. 66 tests cover the engine.
+Agent-Native 0.224, React Router, three.js for the landing hero, ts-morph for the merges, the TypeScript compiler for the check, Vercel Sandbox for the private test machines, Postgres, and Railway for hosting. 68 tests cover the engine.
 
 ## Work that existed before the hackathon
 

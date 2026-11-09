@@ -63,7 +63,11 @@ export function nestedTargets(dir: string, maxDepth = 4, limit = 12): string[] {
 export function checkTargets(dir: string): string[] {
   const root = readConfig(path.join(dir, "tsconfig.json"));
   if (!root || typeof root !== "object") {
-    return fs.existsSync(path.join(dir, "tsconfig.json")) ? ["tsconfig.json"] : nestedTargets(dir);
+    if (fs.existsSync(path.join(dir, "tsconfig.json"))) return ["tsconfig.json"];
+    const nested = nestedTargets(dir);
+    if (nested.length > 0) return nested;
+    // A JavaScript repo with a jsconfig.json can still be checked.
+    return fs.existsSync(path.join(dir, "jsconfig.json")) ? ["jsconfig.json"] : [];
   }
   const refs: unknown[] = Array.isArray(root.references) ? root.references : [];
   const solution = refs.length > 0 && Array.isArray(root.files) && root.files.length === 0 && !root.include;
