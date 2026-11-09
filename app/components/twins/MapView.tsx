@@ -823,8 +823,10 @@ function Timeline({
       toast.success("Pull request opened.");
     } catch (e) {
       if (actionErrorCode(e) === "github_not_connected") {
+        // Straight to GitHub's approval page; coming back opens the pull request.
         setNeedsGithub(true);
-        toast("Connect GitHub first, then press Open pull request again.");
+        toast("Taking you to GitHub to approve access. You'll come right back.");
+        void connectGithub();
       } else {
         toast.error(errorMessage(e));
       }
@@ -841,6 +843,21 @@ function Timeline({
     }
   }
   const kept = data.merges.filter((m) => m.status === "kept").length;
+
+  // Back from GitHub: finish what the user started.
+  const resumed = useRef(false);
+  useEffect(() => {
+    if (sample || resumed.current) return;
+    const url = new URL(window.location.href);
+    const gh = url.searchParams.get("github");
+    if (!gh) return;
+    resumed.current = true;
+    url.searchParams.delete("github");
+    window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
+    if (gh === "connected" && kept > 0) void openPr();
+    else if (gh !== "connected") toast.error("GitHub was not connected. Press Send to my repo to try again.");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kept, sample]);
 
   async function exportPatch() {
     setExporting(true);
