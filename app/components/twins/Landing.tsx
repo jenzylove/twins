@@ -518,7 +518,7 @@ function Agents() {
             {agent.client ? "2 · Run this once in your terminal" : "2 · Add this MCP server address in your app"}
           </p>
           <div className="mt-4">
-            <CopyCommand text={text} prompt={agent.client ? "$ " : ""} />
+            <CopyCommand text={text} prompt="" />
           </div>
           <p className="mt-3 text-[13px] text-[var(--paper-3)]">
             {agent.client
