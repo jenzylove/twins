@@ -1,6 +1,6 @@
-# Chat — Agent Guide
+# Twins — Agent Guide
 
-Chat is the minimal chat-first agent-native app. `/` redirects to shared sign-in, then `/home`, the editable Get started page. Chat lives at `/chat`; new chats start there. Actions carry capabilities; screens exist only for durable workflows.
+Twins finds code that was written more than once in a public GitHub repo and merges the copies into one, keeping a merge only if the app's type check and build are no worse than before. Signed out, `/` is the landing page; signed in, `/map` is the home where a repo is pasted, and `/map/<repoId>` is its map. The assistant chat lives at `/chat`. Every capability is an action, shared by the page, this assistant and external agents over MCP.
 
 ## Skills
 
@@ -19,16 +19,8 @@ For custom branding, keep `server/plugins/agent-native-email-branding.ts` aligne
 
 ## Application state
 
-- `navigation` describes the view and selected ids. Chat is `chat` at `/chat` and `/chat/<threadId>`; the Get started page is `home` at `/home`; `/` opens shared sign-in/signup.
+- `navigation` describes the view and selected ids. The map is at `/map/<repoId>`, with `?set=<setId>` when a set of copies is open; new maps start at `/map`; chat is at `/chat` and `/chat/<threadId>`.
 - Use `navigate` when supported and `view-screen` for a fresh read of visible details; basic navigation is already in `<current-screen>`.
-
-## Building a domain app
-
-Choose the primary workflow and route before editing. Add a domain route under `app/routes/` and set `app.homePath` in `server/plugins/agent-native-email-branding.ts` with `defineAppConfig`. The default Get started page lives at `/home`, and Chat stays at `/chat`; edit `app/routes/home.tsx` when replacing that page with a domain-specific home. Add a static link in `app/components/layout/Sidebar.tsx` before `ChatThreadsSection`; `Header.tsx` uses `APP_TITLE` elsewhere. Shared sidebar and AgentInspector remain.
-
-Use `adding-a-feature` for functional parity and `frontend-design` for a user-facing screen. Keep feature guidance here; do not rewrite `README.md` or `DESIGN.md`. After all edits, run one typecheck, one doctor check, and one browser smoke of the primary workflow, including overlap rejection, cancellation freeing the slot, and authenticated landing. Skip production build and extra test suites.
-
-Before building common workspace or agent UI, read `agent-native-toolkit`; for supported customization, read `customizing-agent-native`.
 
 - Guarded verification: run `pnpm agent-native:doctor`; fix findings before done.
 

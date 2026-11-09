@@ -1,29 +1,18 @@
 # Changelog
 
-All notable user-facing changes to this app are documented here.
+## 2026-11-09
 
-## 2026-10-10
+- Plain language across the app and landing page: "Your app today", "written 3 times", "Keep one copy", "would break your app in N places".
+- Numbered copies on the map and in the side by side code; changed lines highlighted for similar copies.
+- "Send to my repo" becomes the main action once a merge is kept.
+- Connect any coding agent: Claude Code, Codex, Cursor, VS Code Copilot, OpenCode, or any MCP app.
+- Sandboxes no longer keep snapshots after they stop.
 
-### Fixed
+## 2026-11-08
 
-- Large prompts with full context remain available to retry when sending fails.
+- Light porcelain redesign with the 3D merge hero and a vertical landing story.
+- GitHub connect and real pull requests on the user's repo or fork.
 
-## 2026-09-30
+## 2026-11-06
 
-### Improved
-
-- Chat uses a compact + menu with context submenus, keeps task, automation, and skill actions at the root, and omits Generate Image.
-
-## 2026-09-27
-
-### Fixed
-
-- Chat retries the original request with its attachments after model setup.
-
-## 2026-08-27
-
-### Fixed
-
-- Chat includes the runtime packages needed for provider keys after deployment.
-
-For the full list of updates, see the [changelog folder](./changelog/).
+- First build: duplicate finder, merge engine with the safety test inside the merge action, Vercel Sandbox runner, the map, undo, patch export, Claude Code over MCP.
