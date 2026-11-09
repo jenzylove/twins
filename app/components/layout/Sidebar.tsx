@@ -389,8 +389,8 @@ export function Sidebar({
             >
               <TwinsMark className="size-6 shrink-0 text-sidebar-accent-foreground" />
               <span
-                className="truncate text-[22px] leading-none text-sidebar-accent-foreground"
-                style={{ fontFamily: '"Instrument Serif", serif' }}
+                className="truncate text-[20px] leading-none text-sidebar-accent-foreground"
+                style={{ fontFamily: '"Funnel Display", sans-serif', fontWeight: 600, letterSpacing: "-0.03em" }}
               >
                 {APP_TITLE}
               </span>

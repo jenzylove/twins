@@ -13,6 +13,7 @@ async function sha256(text: string): Promise<string> {
 export default async function handler(req: Request): Promise<Response> {
   const auth = req.headers.get("authorization") ?? "";
   const key = auth.replace(/^Bearer\s+/i, "");
+  // guard:allow-env-credential — separate Vercel relay project; a hash of the deploy key, not a user credential
   const allowed = (process.env.ALLOWED_KEY_SHA256 ?? "").trim();
   if (!key || !allowed || (await sha256(key)) !== allowed) {
     return new Response(JSON.stringify({ error: { message: "unauthorized" } }), {

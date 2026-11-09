@@ -1,25 +1,32 @@
-/* Twins blueprint surface. Always dark ink, regardless of app theme. */
+/* Twins blueprint surface. Light porcelain, regardless of app theme. */
 
 .tw {
-  --ink: #060a14;
-  --ink-2: #0a1120;
-  --ink-3: #0f1829;
-  --hair: rgba(125, 200, 255, 0.12);
-  --hair-2: rgba(125, 200, 255, 0.22);
-  --hair-3: rgba(150, 215, 255, 0.42);
-  --cyan: #8fd8ff;
-  --paper: #e8eef8;
-  --paper-2: rgba(232, 238, 248, 0.66);
-  --paper-3: rgba(232, 238, 248, 0.42);
-  --amber: #ffb547;
-  --amber-hot: #ffd27a;
-  --amber-dim: rgba(255, 181, 71, 0.16);
-  --red: #ff5a52;
-  --red-dim: rgba(255, 90, 82, 0.14);
-  --green: #5ff0c4;
-  --font-display: "Instrument Serif", ui-serif, Georgia, serif;
-  --font-sans: "Geist", ui-sans-serif, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  /* Porcelain surface, ink type, one ultraviolet accent. Red only means "said no",
+     green only means "kept". */
+  --ink: #f2f1ed;
+  --ink-2: #ebe9e3;
+  --ink-3: #e1ded6;
+  --hair: rgba(20, 19, 17, 0.09);
+  --hair-2: rgba(20, 19, 17, 0.16);
+  --hair-3: rgba(20, 19, 17, 0.3);
+  --paper: #141311;
+  --paper-2: rgba(20, 19, 17, 0.68);
+  --paper-3: rgba(20, 19, 17, 0.46);
+  --accent: #4a2cff;
+  --accent-hot: #5d43ff;
+  --accent-dim: rgba(74, 44, 255, 0.1);
+  --accent-ink: #ffffff;
+  /* legacy names, kept so older markup follows the new palette */
+  --cyan: var(--accent);
+  --amber: var(--accent);
+  --amber-hot: var(--accent-hot);
+  --amber-dim: var(--accent-dim);
+  --red: #e0341f;
+  --red-dim: rgba(224, 52, 31, 0.1);
+  --green: #0e8f61;
+  --font-display: "Funnel Display", ui-sans-serif, sans-serif;
+  --font-sans: "Funnel Sans", ui-sans-serif, sans-serif;
+  --font-mono: "Martian Mono", ui-monospace, monospace;
   background: var(--ink);
   color: var(--paper);
   font-family: var(--font-sans);
@@ -28,13 +35,14 @@
 
 .tw-display {
   font-family: var(--font-display);
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  line-height: 0.95;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 0.98;
 }
 .tw-mono {
   font-family: var(--font-mono);
   font-feature-settings: "zero" 1;
+  letter-spacing: -0.02em;
 }
 .tw-label {
   font-family: var(--font-mono);
@@ -49,8 +57,8 @@
   background-image:
     linear-gradient(var(--hair) 1px, transparent 1px),
     linear-gradient(90deg, var(--hair) 1px, transparent 1px),
-    linear-gradient(rgba(125, 200, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(125, 200, 255, 0.045) 1px, transparent 1px);
+    linear-gradient(rgba(20, 19, 17, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20, 19, 17, 0.035) 1px, transparent 1px);
   background-size:
     96px 96px,
     96px 96px,
@@ -90,14 +98,13 @@
   outline-offset: 2px;
 }
 .tw-btn-primary {
-  background: var(--amber);
-  color: #1a1004;
-  box-shadow:
-    0 0 0 1px rgba(255, 210, 122, 0.6) inset,
-    0 8px 30px -10px rgba(255, 181, 71, 0.65);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 10px 30px -14px rgba(20, 19, 17, 0.55);
 }
 .tw-btn-primary:hover {
-  background: var(--amber-hot);
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 .tw-btn-primary:disabled {
   opacity: 0.55;
@@ -110,7 +117,7 @@
 }
 .tw-btn-ghost:hover {
   border-color: var(--hair-3);
-  background: rgba(143, 216, 255, 0.06);
+  background: rgba(20, 19, 17, 0.04);
 }
 .tw-btn-ghost:disabled {
   opacity: 0.5;
@@ -247,10 +254,8 @@
   border: 3px solid var(--red);
   border-radius: 6px;
   padding: 0.2em 0.5em;
-  background: rgba(20, 4, 6, 0.6);
-  box-shadow:
-    0 0 0 1px rgba(255, 90, 82, 0.4) inset,
-    0 0 40px rgba(255, 90, 82, 0.35);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 12px 40px -12px rgba(224, 52, 31, 0.45);
   animation: tw-stamp 420ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
   pointer-events: none;
 }
@@ -294,7 +299,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(143, 216, 255, 0.35),
+    rgba(74, 44, 255, 0.25),
     transparent
   );
   animation: tw-scan 1.6s linear infinite;
@@ -312,7 +317,7 @@
   transition: background-color 100ms ease;
 }
 .tw-row:hover {
-  background: rgba(143, 216, 255, 0.04);
+  background: rgba(20, 19, 17, 0.035);
 }
 .tw-row[aria-selected="true"] {
   background: linear-gradient(90deg, var(--amber-dim), transparent 85%);
@@ -341,5 +346,148 @@
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
+  }
+}
+
+/* ------------------------------ landing ------------------------------ */
+.tw ::selection {
+  background: var(--accent);
+  color: #fff;
+}
+.tw-kicker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--paper-3);
+}
+.tw-pill-word {
+  display: inline-block;
+  padding: 0 0.28em 0.06em;
+  margin: 0 0.02em;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  line-height: 1.02;
+  box-shadow: 0 18px 50px -18px rgba(74, 44, 255, 0.7);
+}
+.tw-nav {
+  background: rgba(242, 241, 237, 0.6);
+  border: 1px solid transparent;
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  transition:
+    background-color 300ms ease,
+    border-color 300ms ease,
+    box-shadow 300ms ease;
+}
+.tw-nav[data-scrolled] {
+  background: rgba(250, 249, 246, 0.82);
+  border-color: var(--hair);
+  box-shadow: 0 10px 40px -20px rgba(20, 19, 17, 0.35);
+}
+
+/* one reveal for the whole page: rise and fade, once */
+.tw .rv {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 800ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 800ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.tw .rv[data-in] {
+  opacity: 1;
+  transform: none;
+}
+.tw-hero-in {
+  animation: tw-hero-in 1000ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes tw-hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+/* height animation for the one open step / answer */
+.tw-open {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 550ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    opacity 450ms ease;
+}
+.tw-open > div {
+  overflow: hidden;
+}
+.tw-open[data-open] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+/* soft light pool under the tablets, tinted by the outcome */
+.tw-stage-glow {
+  position: absolute;
+  left: 50%;
+  top: 80%;
+  width: min(900px, 92vw);
+  height: 260px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(74, 44, 255, 0.12), transparent);
+  filter: blur(20px);
+  transition: background 700ms ease;
+  pointer-events: none;
+}
+.tw-stage-glow[data-tone="kept"] {
+  background: radial-gradient(closest-side, rgba(14, 143, 97, 0.14), transparent);
+}
+.tw-stage-glow[data-tone="refused"] {
+  background: radial-gradient(closest-side, rgba(224, 52, 31, 0.14), transparent);
+}
+
+.tw-fade-edges {
+  -webkit-mask-image: radial-gradient(120% 100% at 50% 50%, #000 62%, transparent 100%);
+  mask-image: radial-gradient(120% 100% at 50% 50%, #000 62%, transparent 100%);
+}
+
+.tw-said-stamp {
+  position: absolute;
+  right: 0;
+  top: -8px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 26px;
+  letter-spacing: 0.08em;
+  color: #ff5a3d;
+  border: 3px solid #ff5a3d;
+  border-radius: 8px;
+  padding: 0.15em 0.45em;
+  transform: rotate(-8deg) scale(1.8);
+  opacity: 0;
+  transition:
+    transform 500ms cubic-bezier(0.2, 1.4, 0.4, 1) 900ms,
+    opacity 200ms ease 900ms;
+}
+.rv[data-in] .tw-said-stamp {
+  transform: rotate(-8deg) scale(1);
+  opacity: 1;
+}
+@media (min-width: 768px) {
+  .tw-said-stamp {
+    font-size: 34px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tw .rv {
+    opacity: 1;
+    transform: none;
   }
 }

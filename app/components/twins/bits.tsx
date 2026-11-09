@@ -68,9 +68,9 @@ export function TwinsMark({ className }: { className?: string }) {
   // Two offset frames: the copy and the one that stays.
   return (
     <svg viewBox="0 0 28 28" className={className} aria-hidden="true">
-      <rect x="3.5" y="3.5" width="14" height="14" rx="1.5" fill="none" stroke="currentColor" strokeOpacity="0.45" />
-      <rect x="10.5" y="10.5" width="14" height="14" rx="1.5" fill="#ffb547" fillOpacity="0.18" stroke="#ffb547" />
-      <circle cx="10.5" cy="10.5" r="1.6" fill="#ffd27a" />
+      <rect x="3.5" y="3.5" width="14" height="14" rx="1.5" fill="none" stroke="currentColor" strokeOpacity="0.35" />
+      <rect x="10.5" y="10.5" width="14" height="14" rx="1.5" fill="var(--accent)" fillOpacity="0.14" stroke="var(--accent)" />
+      <circle cx="10.5" cy="10.5" r="1.6" fill="var(--accent)" />
     </svg>
   );
 }

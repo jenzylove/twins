@@ -55,12 +55,12 @@ export const links: LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&family=Funnel+Sans:ital,wght@0,300..800;1,300..800&family=Martian+Mono:wght@300..700&display=swap",
   },
   { rel: "stylesheet", href: stylesheet },
 ];
 
-const THEME_INIT_SCRIPT = getThemeInitScript("dark");
+const THEME_INIT_SCRIPT = getThemeInitScript("light");
 const LOCALE_INIT_SCRIPT = getLocaleInitScript();
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -81,7 +81,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: LOCALE_INIT_SCRIPT }}
         />
-        <meta name="theme-color" content="#060A14" />
+        <meta name="theme-color" content="#F2F1ED" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta
           name="apple-mobile-web-app-status-bar-style"
@@ -211,7 +211,7 @@ export default function Root() {
       <AppToolkitProvider>
         <AppProviders
           queryClient={queryClient}
-          defaultTheme="dark"
+          defaultTheme="light"
           isPublicPath
           i18n={{ catalog: i18nCatalog }}
         >
@@ -227,7 +227,7 @@ export default function Root() {
       <AppToolkitProvider>
         <AppProviders
           queryClient={queryClient}
-          defaultTheme="dark"
+          defaultTheme="light"
           skipFirstRunOnboarding
           showEnvironmentBadge={false}
           i18n={{ catalog: i18nCatalog }}
@@ -242,7 +242,7 @@ export default function Root() {
     <AppToolkitProvider>
       <AppProviders
         queryClient={queryClient}
-        defaultTheme="dark"
+        defaultTheme="light"
         skeletonLayout={skeletonLayoutForPath(pathname)}
         i18n={{ catalog: i18nCatalog }}
       >

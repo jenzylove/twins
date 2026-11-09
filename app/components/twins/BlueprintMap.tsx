@@ -199,8 +199,8 @@ export function BlueprintMap({
               <feGaussianBlur stdDeviation="9" />
             </filter>
             <linearGradient id="tw-arc-grad" x1="0" x2="1">
-              <stop offset="0" stopColor="#ffd27a" />
-              <stop offset="1" stopColor="#ffb547" />
+              <stop offset="0" stopColor="var(--accent-hot)" />
+              <stop offset="1" stopColor="var(--accent)" />
             </linearGradient>
           </defs>
 
@@ -215,8 +215,8 @@ export function BlueprintMap({
                   y={r.y + 0.5}
                   width={Math.max(0, r.w - 1)}
                   height={Math.max(0, r.h - 1)}
-                  fill={r.depth === 1 ? "#070d19" : "none"}
-                  stroke={strong ? "rgba(150,215,255,0.34)" : "rgba(125,200,255,0.16)"}
+                  fill={r.depth === 1 ? "rgba(20,19,17,0.035)" : "none"}
+                  stroke={strong ? "rgba(20,19,17,0.28)" : "rgba(20,19,17,0.14)"}
                   strokeWidth={1}
                   strokeDasharray={strong ? undefined : "3 3"}
                 />
@@ -226,7 +226,7 @@ export function BlueprintMap({
                     y={r.y + (size.w < 520 ? 10 : 11.5)}
                     fontSize={size.w < 520 ? 7.5 : 8.5}
                     letterSpacing="0.1em"
-                    fill={strong ? "rgba(190,228,255,0.75)" : "rgba(170,215,255,0.45)"}
+                    fill={strong ? "rgba(20,19,17,0.68)" : "rgba(20,19,17,0.42)"}
                   >
                     {r.label.toUpperCase().slice(0, Math.floor(r.w / 6.2))}
                   </text>
@@ -266,17 +266,17 @@ export function BlueprintMap({
                   height={c.h}
                   fill={
                     inFocus
-                      ? "rgba(255,181,71,0.22)"
+                      ? "rgba(74,44,255,0.18)"
                       : isCopy
-                        ? "rgba(255,181,71,0.09)"
-                        : "rgba(143,216,255,0.055)"
+                        ? "rgba(74,44,255,0.08)"
+                        : "rgba(20,19,17,0.06)"
                   }
                   stroke={
                     inFocus
-                      ? "#ffd27a"
+                      ? "var(--accent-hot)"
                       : isCopy
-                        ? "rgba(255,181,71,0.55)"
-                        : "rgba(140,205,255,0.26)"
+                        ? "rgba(74,44,255,0.55)"
+                        : "rgba(20,19,17,0.22)"
                   }
                   strokeWidth={inFocus ? 1.25 : 0.75}
                   opacity={dim ? 0.5 : 1}
@@ -288,11 +288,11 @@ export function BlueprintMap({
                     y={c.y}
                     width={c.w}
                     height={c.h}
-                    fill="#ffb547"
-                    opacity={0.6}
+                    fill="var(--accent)"
+                    opacity={0.35}
                     filter="url(#tw-glow-soft)"
                     pointerEvents="none"
-                    style={{ mixBlendMode: "screen" }}
+                    style={{ mixBlendMode: "multiply" }}
                   />
                 ) : null}
                 {showNames && c.w > 64 && c.h > 20 ? (
@@ -301,7 +301,7 @@ export function BlueprintMap({
                     y={c.y + 12}
                     fontSize={8.5}
                     fill={
-                      isCopy ? "rgba(255,222,160,0.95)" : "rgba(200,225,250,0.42)"
+                      isCopy ? "var(--accent)" : "rgba(20,19,17,0.5)"
                     }
                     pointerEvents="none"
                   >
@@ -320,8 +320,8 @@ export function BlueprintMap({
                   <path
                     d={a.d}
                     fill="none"
-                    stroke="#ffb547"
-                    strokeOpacity={0.35}
+                    stroke="var(--accent)"
+                    strokeOpacity={0.2}
                     strokeWidth={5}
                     filter="url(#tw-glow)"
                     className="tw-arc"
@@ -338,7 +338,7 @@ export function BlueprintMap({
                   <path
                     d={a.d}
                     fill="none"
-                    stroke="#fff6e0"
+                    stroke="var(--accent-hot)"
                     strokeWidth={1.4}
                     strokeLinecap="round"
                     className="tw-arc-flow"
@@ -348,8 +348,8 @@ export function BlueprintMap({
               ))}
               {arcs.pts.map((p, i) => (
                 <g key={`pt-${i}`}>
-                  <circle cx={p.x} cy={p.y} r={7} fill="#ffb547" opacity={0.25} filter="url(#tw-glow)" />
-                  <circle cx={p.x} cy={p.y} r={2.6} fill="#fff3d6" />
+                  <circle cx={p.x} cy={p.y} r={7} fill="var(--accent)" opacity={0.2} filter="url(#tw-glow)" />
+                  <circle cx={p.x} cy={p.y} r={2.6} fill="var(--accent)" />
                 </g>
               ))}
             </g>
@@ -369,7 +369,7 @@ export function BlueprintMap({
                     y={c.y}
                     width={c.w}
                     height={c.h}
-                    fill="#ffb547"
+                    fill="var(--accent)"
                     style={{
                       ["--dx" as string]: `${t.x - s.x}px`,
                       ["--dy" as string]: `${t.y - s.y}px`,
@@ -383,7 +383,7 @@ export function BlueprintMap({
                 width={eventCells[0]!.w}
                 height={eventCells[0]!.h}
                 fill="none"
-                stroke="#5ff0c4"
+                stroke="var(--green)"
                 strokeWidth={2}
                 className="tw-ring"
               />
@@ -392,8 +392,8 @@ export function BlueprintMap({
                 y={eventCells[0]!.y}
                 width={eventCells[0]!.w}
                 height={eventCells[0]!.h}
-                fill="rgba(95,240,196,0.25)"
-                stroke="#5ff0c4"
+                fill="rgba(14,143,97,0.2)"
+                stroke="var(--green)"
                 strokeWidth={1.25}
                 className="tw-fade-in"
               />
@@ -411,8 +411,8 @@ export function BlueprintMap({
                   y={c.y}
                   width={c.w}
                   height={c.h}
-                  fill="rgba(255,90,82,0.55)"
-                  stroke="#ff5a52"
+                  fill="rgba(224,52,31,0.35)"
+                  stroke="var(--red)"
                   strokeWidth={1.5}
                 />
               ))}
@@ -441,9 +441,9 @@ export function BlueprintMap({
           style={{
             left: Math.min(Math.max(center(eventCells[0]).x, 90), size.w - 90),
             top: Math.max(14, eventCells[0].y - 14),
-            background: "rgba(6,20,16,0.85)",
-            color: "#5ff0c4",
-            border: "1px solid rgba(95,240,196,0.6)",
+            background: "rgba(255,255,255,0.94)", boxShadow: "0 8px 24px -10px rgba(20,19,17,0.35)",
+            color: "var(--green)",
+            border: "1px solid rgba(14,143,97,0.55)",
           }}
         >
           KEPT · STILL BUILDS
@@ -477,8 +477,8 @@ function CellTip({
         left: flip ? x - 14 : x + 14,
         top: Math.min(y + 14, box.height - 70),
         transform: flip ? "translateX(-100%)" : undefined,
-        background: "rgba(6,10,20,0.94)",
-        border: "1px solid rgba(150,215,255,0.28)",
+        background: "rgba(255,255,255,0.96)",
+        border: "1px solid var(--hair-2)", boxShadow: "0 8px 24px -10px rgba(20,19,17,0.3)",
         color: "var(--paper)",
       }}
     >

@@ -37,14 +37,14 @@ export function RepoInput() {
       <div className="pointer-events-none absolute inset-0 opacity-[0.22]">
         <BlueprintMap files={fixtureMap.files} sets={fixtureMap.sets} quiet minHeight={0} />
       </div>
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_40%,rgba(6,10,20,0.6),var(--ink)_75%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_40%,rgba(242,241,237,0.6),var(--ink)_75%)]" />
 
       <div className="relative flex flex-1 flex-col justify-center px-5 py-16 md:px-14">
         <p className="tw-label">New map</p>
         <h1 className="tw-display mt-4 max-w-4xl text-[52px] md:text-[92px]">
           Paste a public
           <br />
-          <em className="text-[var(--amber)]">GitHub</em> repo.
+          <span className="tw-pill-word">GitHub</span> repo.
         </h1>
         <form
           className="mt-10 flex max-w-3xl flex-col gap-4 sm:flex-row sm:items-end"

@@ -226,7 +226,7 @@ function Result({
       <div
         key={merge.id}
         className="tw-fade-in max-h-[38%] shrink-0 overflow-auto border-t px-4 py-3"
-        style={{ borderColor: "rgba(255,90,82,0.4)", background: "var(--red-dim)" }}
+        style={{ borderColor: "rgba(224,52,31,0.4)", background: "var(--red-dim)" }}
         role="alert"
       >
         <p className="flex flex-wrap items-baseline gap-x-3 text-[13px]">
@@ -266,8 +266,8 @@ function Result({
       key={merge.id}
       className="tw-fade-in shrink-0 border-t px-4 py-3"
       style={{
-        borderColor: kept ? "rgba(95,240,196,0.35)" : "var(--hair)",
-        background: kept ? "rgba(95,240,196,0.06)" : undefined,
+        borderColor: kept ? "rgba(14,143,97,0.4)" : "var(--hair)",
+        background: kept ? "rgba(14,143,97,0.07)" : undefined,
       }}
     >
       <p className="flex flex-wrap items-baseline gap-x-3 text-[13px]">

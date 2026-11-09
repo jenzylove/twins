@@ -360,15 +360,15 @@ function Legend() {
   return (
     <div className="tw-mono pointer-events-none absolute bottom-3 left-5 hidden items-center gap-4 text-[10px] tracking-[0.12em] text-[var(--paper-3)] md:flex">
       <span className="flex items-center gap-1.5">
-        <span className="inline-block size-2.5 border border-[rgba(150,215,255,0.34)]" />
+        <span className="inline-block size-2.5 border border-[rgba(20,19,17,0.28)]" />
         FOLDER
       </span>
       <span className="flex items-center gap-1.5">
-        <span className="inline-block size-2.5 border border-[rgba(125,200,255,0.2)] bg-[rgba(143,216,255,0.05)]" />
+        <span className="inline-block size-2.5 border border-[rgba(20,19,17,0.22)] bg-[rgba(20,19,17,0.06)]" />
         FILE
       </span>
       <span className="flex items-center gap-1.5">
-        <span className="inline-block size-2.5 border border-[var(--amber)] bg-[rgba(255,181,71,0.35)] shadow-[0_0_8px_var(--amber)]" />
+        <span className="inline-block size-2.5 border border-[var(--amber)] bg-[rgba(74,44,255,0.3)] shadow-[0_0_6px_rgba(74,44,255,0.35)]" />
         HOLDS A COPY
       </span>
     </div>
@@ -467,8 +467,8 @@ function KindBadge({ set }: { set: TwinSet }) {
     <span
       className="tw-mono rounded-sm px-1 text-[9.5px] tracking-[0.14em]"
       style={{
-        color: exact ? "var(--amber)" : "var(--cyan)",
-        border: `1px solid ${exact ? "rgba(255,181,71,0.45)" : "rgba(143,216,255,0.35)"}`,
+        color: exact ? "var(--amber)" : "var(--paper-2)",
+        border: `1px solid ${exact ? "var(--accent)" : "var(--hair-3)"}`,
       }}
       title={exact ? "Same code, same dependencies" : "Same shape, small differences"}
     >
@@ -586,7 +586,7 @@ function ComparePanel({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="flex size-9 items-center justify-center rounded-full text-[var(--paper-3)] hover:bg-[rgba(143,216,255,0.06)] hover:text-[var(--paper)]"
+            className="flex size-9 items-center justify-center rounded-full text-[var(--paper-3)] hover:bg-[rgba(20,19,17,0.05)] hover:text-[var(--paper)]"
           >
             <IconX className="size-4" />
           </button>
@@ -649,7 +649,7 @@ function CodeBlock({ code, start }: { code: string; start: number }) {
   return (
     <pre className="tw-code min-w-max px-0 py-2 text-[var(--paper-2)]">
       {lines.map((l, i) => (
-        <div key={i} className="flex hover:bg-[rgba(143,216,255,0.04)]">
+        <div key={i} className="flex hover:bg-[rgba(20,19,17,0.04)]">
           <span className="w-11 shrink-0 select-none pr-3 text-right text-[var(--paper-3)] opacity-60">
             {start + i}
           </span>
@@ -664,7 +664,7 @@ function Refusal({ errors }: { errors: Diag[] }) {
   return (
     <div
       className="tw-fade-in border-b px-4 py-3 md:px-5"
-      style={{ borderColor: "rgba(255,90,82,0.35)", background: "var(--red-dim)" }}
+      style={{ borderColor: "rgba(224,52,31,0.35)", background: "var(--red-dim)" }}
       role="alert"
     >
       <p className="flex flex-wrap items-baseline gap-x-3 text-[13px]">
