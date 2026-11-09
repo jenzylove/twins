@@ -284,7 +284,7 @@ function TopStrip({ data }: { data: MapData }) {
             </details>
           ) : (
             <p className="tw-mono mt-1 text-[12px] text-[var(--paper-3)]">
-              {status === "failed" ? "not recorded" : "recording…"}
+              {status === "failed" ? "not checked yet" : "checking…"}
             </p>
           )}
         </div>

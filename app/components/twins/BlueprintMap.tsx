@@ -456,7 +456,7 @@ export function BlueprintMap({
           key={`kept-${event.key}`}
           className="tw-kept-badge tw-mono pointer-events-none absolute whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-semibold tracking-[0.12em]"
           style={{
-            left: Math.min(Math.max(center(eventCells[0]).x, 90), size.w - 90),
+            left: Math.min(Math.max(center(eventCells[0]).x, 130), size.w - 130),
             top: Math.max(14, eventCells[0].y - 14),
             background: "rgba(255,255,255,0.94)", boxShadow: "0 8px 24px -10px rgba(20,19,17,0.35)",
             color: "var(--green)",
