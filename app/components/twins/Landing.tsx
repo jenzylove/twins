@@ -108,10 +108,13 @@ function Hero() {
             Map a repo
             <IconArrowRight className="size-4" strokeWidth={2} />
           </Link>
-          <a href="#said-no" className="tw-btn tw-btn-ghost h-12 px-6 text-[15px]">
-            See it say no
-          </a>
+          <Link to="/sample" reloadDocument className="tw-btn tw-btn-ghost h-12 px-6 text-[15px]">
+            See a real map
+          </Link>
         </div>
+        <p className="tw-hero-in tw-mono mt-3 text-[11.5px] text-[var(--paper-3)]" style={{ animationDelay: "360ms" }}>
+          The real map opens with no account
+        </p>
       </div>
 
       <div className="tw-hero-in relative mx-auto -mt-4 h-[360px] max-w-[1200px] sm:h-[460px] md:h-[520px]" style={{ animationDelay: "420ms" }}>

@@ -23,6 +23,7 @@ import {
   errorMessage,
   useCompare,
   useTwinsActions,
+  useSample,
   useTwinsMap,
   type MergeOutcome,
 } from "./use-twins";
@@ -64,8 +65,10 @@ export function MapView({ repoId }: { repoId: string }) {
       null)
     : null;
 
+  const sample = useSample();
   // Tell the agent what is selected (navigation carries the ids from the URL).
   useEffect(() => {
+    if (sample) return;
     void writeClientAppState(
       `selection:${TAB_ID}`,
       selectedSet
@@ -78,7 +81,7 @@ export function MapView({ repoId }: { repoId: string }) {
         : null,
       { requestSource: TAB_ID },
     ).catch(() => {});
-  }, [repoId, selectedSet]);
+  }, [repoId, selectedSet, sample]);
 
   // Animate every new merge, whoever made it (you, the agent, Claude Code).
   useEffect(() => {
@@ -165,6 +168,7 @@ export function MapView({ repoId }: { repoId: string }) {
 
   return (
     <Shell>
+      {sample ? <SampleBanner recordedAt={sample.recordedAt} /> : null}
       <TopStrip data={data} />
       <div className="flex min-h-0 flex-1 flex-col @4xl:flex-row">
         <section className="flex min-h-0 min-w-0 flex-1 flex-col">
@@ -214,6 +218,22 @@ export function MapView({ repoId }: { repoId: string }) {
   );
 }
 
+const SIGNUP = "/sign-in?c=JTJGbWFw&tab=signup";
+
+function SampleBanner({ recordedAt }: { recordedAt: string }) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--hair)] bg-[var(--accent)] px-4 py-2.5 text-[13px] text-[var(--accent-ink)] md:px-6">
+      <p>
+        <span className="font-semibold">A real run, recorded {recordedAt}.</span>{" "}
+        Read only: open any set to see the copies side by side, and the history for the kept and the blocked merge.
+      </p>
+      <a href={SIGNUP} className="tw-btn h-8 shrink-0 bg-[var(--accent-ink)] px-4 text-[13px] text-[var(--accent)]">
+        Map your own repo
+      </a>
+    </div>
+  );
+}
+
 function capital(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
@@ -254,7 +274,7 @@ function TopStrip({ data }: { data: MapData }) {
       </div>
 
       <div className="absolute right-3 top-3 hidden md:block">
-        <AgentToggleButton />
+        {useSample() ? null : <AgentToggleButton />}
       </div>
       <div className="flex items-end gap-6 self-end md:gap-10 md:self-auto md:pr-10">
         <div className="hidden max-w-[260px] sm:block">
@@ -518,6 +538,7 @@ function ComparePanel({
 }) {
   const compare = useCompare(repoId, merged ? null : set.id);
   const { runMerge } = useTwinsActions(repoId);
+  const sample = useSample();
   const [pending, setPending] = useState(false);
   const ready = data.status === "ready";
   // A sandbox hiccup, not a repo problem: merging again restarts the sandbox first.
@@ -582,6 +603,11 @@ function ComparePanel({
         <div className="flex flex-wrap items-center gap-2">
           {merged ? (
             <span className="tw-mono text-[12px] text-[var(--green)]">One copy · still builds, no new errors</span>
+          ) : sample ? (
+            <a href={SIGNUP} className="tw-btn tw-btn-primary h-9">
+              <IconGitMerge className="size-4" strokeWidth={1.8} />
+              Create an account to merge
+            </a>
           ) : (
             <>
               <button
@@ -777,6 +803,7 @@ function Timeline({
   knownSets: Map<string, TwinSet>;
 }) {
   const { runUndo, runExport, runOpenPr, undoPending } = useTwinsActions(repoId);
+  const sample = useSample();
   const [exporting, setExporting] = useState(false);
   const [opening, setOpening] = useState(false);
   const [needsGithub, setNeedsGithub] = useState(false);
@@ -853,14 +880,30 @@ function Timeline({
               /^Merged? (?:of )?(\S+)/.exec(m.summary)?.[1] ??
               m.setId
             }
-            onUndo={() =>
-              void runUndo(m.id).catch((e) => toast.error(errorMessage(e)))
+            onUndo={
+              sample
+                ? undefined
+                : () => void runUndo(m.id).catch((e) => toast.error(errorMessage(e)))
             }
             undoPending={undoPending}
           />
         ))}
       </ol>
       <div className="flex flex-wrap items-center gap-2 border-t border-[var(--hair)] px-5 py-3">
+        {sample ? (
+          <>
+            {data.repo.prUrl ? (
+              <a href={data.repo.prUrl} target="_blank" rel="noreferrer" className="tw-btn tw-btn-ghost h-9">
+                <IconExternalLink className="size-4" strokeWidth={1.8} />
+                The pull request it became
+              </a>
+            ) : null}
+            <a href={SIGNUP} className="tw-btn tw-btn-primary h-9">
+              Map your own repo
+            </a>
+          </>
+        ) : (
+        <>
         <button
           type="button"
           onClick={() => void exportPatch()}
@@ -902,6 +945,8 @@ function Timeline({
             {opening ? "Opening pull request…" : "Send to my repo"}
           </button>
         )}
+        </>
+        )}
       </div>
     </div>
   );
@@ -915,7 +960,7 @@ function TimelineRow({
 }: {
   m: MergeRecord;
   setName: string;
-  onUndo: () => void;
+  onUndo?: (() => void) | undefined;
   undoPending: boolean;
 }) {
   const who = callerLabel(m.caller);
@@ -969,7 +1014,7 @@ function TimelineRow({
               : "would break the app, nothing changed"}
           </span>
         ) : null}
-        {m.status === "kept" ? (
+        {m.status === "kept" && onUndo ? (
           <button
             type="button"
             onClick={onUndo}

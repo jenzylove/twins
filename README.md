@@ -27,6 +27,7 @@
 | | |
 | --- | --- |
 | Try it | [twins.jdollar.site](https://twins.jdollar.site), sign in and paste any public TypeScript repo (or JavaScript with a jsconfig.json) |
+| See a real map, no account | [twins.jdollar.site/sample](https://twins.jdollar.site/sample): a recorded real run, read only, with the kept merge and the merge Claude Code got blocked on |
 | Watch it | [Demo on Clips](https://clips.agent-native.com/share/iCzMWhKTryvW), 1 min 40 s |
 | See a real result | [Pull request Twins opened](https://github.com/jenzylove/nectarpay-crm/pull/1) on a fork of an app built with an AI app builder |
 | Connect your agent | `npx @agent-native/core@latest connect https://twins.jdollar.site --client claude-code` (also `codex`, `cursor`, `github-copilot`, `opencode`) |

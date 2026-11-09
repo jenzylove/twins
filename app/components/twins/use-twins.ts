@@ -5,7 +5,7 @@ import {
   useActionQuery,
 } from "@agent-native/core/client/hooks";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo } from "react";
+import { createContext, useCallback, useContext, useMemo } from "react";
 
 import type {
   CompareResult,
@@ -97,13 +97,28 @@ function normalize(raw: RawMap, twins: RawTwins | undefined): MapData {
   };
 }
 
+/* --------------------------------- sample -------------------------------- */
+// A recorded real run, shown read only to visitors without an account.
+export type Sample = {
+  recordedAt: string;
+  map: unknown;
+  twins: unknown;
+  compares: Record<string, unknown>;
+};
+export const SampleContext = createContext<Sample | null>(null);
+export function useSample(): Sample | null {
+  return useContext(SampleContext);
+}
+
 /* --------------------------------- hooks --------------------------------- */
 
 export function useTwinsMap(repoId: string) {
+  const sample = useSample();
   const map = useActionQuery(
     "get-map",
     { repoId },
     {
+      enabled: !sample,
       refetchInterval: (q) => {
         const data = q.state.data as RawMap | undefined;
         if (!data) return false;
@@ -118,24 +133,26 @@ export function useTwinsMap(repoId: string) {
   const twins = useActionQuery(
     "find-twins",
     { repoId, kind: "all", limit: 200 },
-    { enabled: Boolean(map.data) },
+    { enabled: Boolean(map.data) && !sample },
   );
-  const rawMap = map.data as RawMap | undefined;
-  const rawTwins = twins.data as RawTwins | undefined;
+  const rawMap = (sample ? sample.map : map.data) as RawMap | undefined;
+  const rawTwins = (sample ? sample.twins : twins.data) as RawTwins | undefined;
   const data = useMemo(
     () => (rawMap ? normalize(rawMap, rawTwins) : null),
     [rawMap, rawTwins],
   );
+  if (sample) return { data, error: null, isLoading: false };
   return { data, error: map.error, isLoading: map.isLoading };
 }
 
 export function useCompare(repoId: string, setId: string | null) {
+  const sample = useSample();
   const query = useActionQuery(
     "compare-twins",
     { repoId, setId: setId ?? "" },
-    { enabled: Boolean(setId) },
+    { enabled: Boolean(setId) && !sample },
   );
-  const raw = query.data as
+  const raw = (sample ? (setId ? sample.compares[setId] : undefined) : query.data) as
     | {
         setId: string;
         members: {
@@ -156,7 +173,7 @@ export function useCompare(repoId: string, setId: string | null) {
   return {
     data,
     error: query.error,
-    isLoading: query.isLoading && Boolean(setId),
+    isLoading: !sample && query.isLoading && Boolean(setId),
   };
 }
 

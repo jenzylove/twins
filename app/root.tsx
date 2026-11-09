@@ -206,7 +206,7 @@ export default function Root() {
   const { pathname } = useLocation();
   // The landing page is public and server rendered on its own, without the
   // signed-in workspace chrome (sync, command menu, sidebars).
-  if (pathname === "/") {
+  if (pathname === "/" || pathname === "/sample") {
     return (
       <AppToolkitProvider>
         <AppProviders
