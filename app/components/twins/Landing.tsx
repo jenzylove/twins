@@ -426,12 +426,12 @@ function SaidNo() {
 
 /* --------------------------------- agents ---------------------------------- */
 
-function CopyCommand({ text }: { text: string }) {
+function CopyCommand({ text, prompt = "$ " }: { text: string; prompt?: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <div className="flex items-center gap-4 border-b border-[var(--hair-3)] pb-4">
-      <code className="tw-mono min-w-0 flex-1 overflow-x-auto whitespace-nowrap text-[13px] text-[var(--paper)] md:text-[15px]">
-        <span className="select-none text-[var(--accent)]">$ </span>
+      <code className="tw-mono min-w-0 flex-1 break-all text-[13px] leading-relaxed text-[var(--paper)] md:text-[14px]">
+        {prompt ? <span className="select-none text-[var(--accent)]">{prompt}</span> : null}
         {text}
       </code>
       <button
@@ -459,24 +459,70 @@ const PROMPTS = [
   "open a pull request with the kept merges",
 ];
 
+const AGENTS: { id: string; label: string; client?: string }[] = [
+  { id: "claude", label: "Claude Code", client: "claude-code" },
+  { id: "codex", label: "Codex", client: "codex" },
+  { id: "cursor", label: "Cursor", client: "cursor" },
+  { id: "copilot", label: "VS Code Copilot", client: "github-copilot" },
+  { id: "opencode", label: "OpenCode", client: "opencode" },
+  { id: "any", label: "Any MCP app" },
+];
+const MCP_URL = "https://twins.jdollar.site/_agent-native/mcp";
+
 function Agents() {
+  const [pick, setPick] = useState("claude");
+  const agent = AGENTS.find((x) => x.id === pick)!;
+  const text = agent.client ? `${CONNECT} --client ${agent.client}` : MCP_URL;
   return (
     <section id="agents" className="px-4 py-28 md:px-10 md:py-40">
       <div className="mx-auto max-w-[900px] text-center">
-        <p className="tw-kicker rv">From your agent</p>
+        <p className="tw-kicker rv">Works with your coding agent</p>
         <h2 className="tw-display rv mt-6 text-[40px] md:text-[72px]">
-          Ask Claude Code. <br className="hidden md:block" />
+          Your agent does the work. <br className="hidden md:block" />
           Twins does the checking.
         </h2>
-        <p className="rv mx-auto mt-7 max-w-[600px] text-[17px] leading-relaxed text-[var(--paper-2)]">
-          Connect once and your coding agent gets the same tools as this page:
-          import, compare, read, merge, undo, export and open a pull request. The
-          map you have open moves live while it works.
+        <p className="rv mx-auto mt-7 max-w-[620px] text-[17px] leading-relaxed text-[var(--paper-2)]">
+          Plug Twins into the coding agent you already use. Your agent can then
+          find copies, merge them and open the pull request for you, and every
+          merge it makes still has to pass the same safety test. The map you have
+          open updates live while it works.
         </p>
+
         <div className="rv mx-auto mt-12 max-w-[760px] text-left">
-          <CopyCommand text={CONNECT} />
+          <p className="tw-mono text-[11px] uppercase tracking-[0.14em] text-[var(--paper-3)]">1 · Pick your agent</p>
+          <div className="mt-4 flex flex-wrap gap-2" role="tablist" aria-label="Coding agent">
+            {AGENTS.map((x) => (
+              <button
+                key={x.id}
+                type="button"
+                role="tab"
+                aria-selected={pick === x.id}
+                onClick={() => setPick(x.id)}
+                className="rounded-full border px-4 py-2 text-[14px] transition-colors"
+                style={
+                  pick === x.id
+                    ? { background: "var(--paper)", color: "var(--ink)", borderColor: "var(--paper)" }
+                    : { borderColor: "var(--hair-2)", color: "var(--paper-2)" }
+                }
+              >
+                {x.label}
+              </button>
+            ))}
+          </div>
+          <p className="tw-mono mt-10 text-[11px] uppercase tracking-[0.14em] text-[var(--paper-3)]">
+            {agent.client ? "2 · Run this once in your terminal" : "2 · Add this MCP server address in your app"}
+          </p>
+          <div className="mt-4">
+            <CopyCommand text={text} prompt={agent.client ? "$ " : ""} />
+          </div>
+          <p className="mt-3 text-[13px] text-[var(--paper-3)]">
+            {agent.client
+              ? `It adds Twins to ${agent.label}. You sign in to Twins once, and it is free.`
+              : "Twins is a standard MCP server, so any app that supports MCP can use it. You sign in on first use."}
+          </p>
+          <p className="tw-mono mt-10 text-[11px] uppercase tracking-[0.14em] text-[var(--paper-3)]">3 · Then just ask</p>
         </div>
-        <ul className="mx-auto mt-12 max-w-[760px] text-left">
+        <ul className="mx-auto mt-2 max-w-[760px] text-left">
           {PROMPTS.map((p, i) => (
             <li
               key={p}
@@ -509,8 +555,8 @@ const FAQ = [
     a: "Twins tried the merge and it would have broken something that worked before. So nothing changed, and Twins shows you exactly which lines would have broken.",
   },
   {
-    q: "Can Claude Code get around the check?",
-    a: "No. The test is built into the merge itself, not the page. You, the assistant inside Twins and Claude Code all go through the same merge, so the same test applies to everyone.",
+    q: "Can my agent get around the safety test?",
+    a: "No. The test is built into the merge itself, not the page. You, the assistant inside Twins and any connected agent, whether Claude Code, Codex, Cursor or another, all go through the same merge, so the same test applies to everyone.",
   },
   {
     q: "Which repos work?",
@@ -651,7 +697,7 @@ export function Landing() {
           <div>
             <p className="tw-kicker">Build</p>
             <ul className="mt-4 space-y-2.5 text-[14.5px] text-[var(--paper-2)]">
-              <li><a href="#agents" className="hover:text-[var(--paper)]">Connect Claude Code</a></li>
+              <li><a href="#agents" className="hover:text-[var(--paper)]">Connect your agent</a></li>
               <li>
                 <a href={REPO_URL} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-[var(--paper)]">
                   Source on GitHub <IconArrowUpRight className="size-3.5" />
@@ -667,7 +713,7 @@ export function Landing() {
         </div>
         <div className="mx-auto mt-14 flex max-w-[1200px] flex-col gap-2 border-t border-[var(--hair)] pt-6 text-[12.5px] text-[var(--paper-3)] sm:flex-row sm:justify-between">
           <span>Twins, 2026</span>
-          <span>Your code is read, never run on our server.</span>
+          <span>Your code is tested on a private machine that is deleted afterwards.</span>
         </div>
       </footer>
     </div>
