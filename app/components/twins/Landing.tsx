@@ -11,6 +11,8 @@ const Hero3D = lazy(() => import("./Hero3D").then((m) => ({ default: m.Hero3D })
 
 const CONNECT = "npx @agent-native/core@latest connect https://twins.jdollar.site";
 const REPO_URL = "https://github.com/jenzylove/twins";
+// New visitors land on "Create account", then go straight to a new map.
+const START = "/sign-in?c=JTJGbWFw&tab=signup";
 
 /* ------------------------------- motion utils ------------------------------ */
 
@@ -102,7 +104,7 @@ function Hero() {
           if your app still builds with no new errors.
         </p>
         <div className="tw-hero-in mt-8 flex flex-wrap justify-center gap-3" style={{ animationDelay: "320ms" }}>
-          <Link to="/map" className="tw-btn tw-btn-primary h-12 px-6 text-[15px]">
+          <Link to={START} reloadDocument className="tw-btn tw-btn-primary h-12 px-6 text-[15px]">
             Map a repo
             <IconArrowRight className="size-4" strokeWidth={2} />
           </Link>
@@ -654,7 +656,7 @@ export function Landing() {
             <a href="#faq" className="hidden rounded-full px-3 py-2 text-[13.5px] text-[var(--paper-2)] hover:text-[var(--paper)] md:inline">
               Questions
             </a>
-            <Link to="/map" className="tw-btn tw-btn-primary ml-1 h-9 px-4">
+            <Link to={START} reloadDocument className="tw-btn tw-btn-primary ml-1 h-9 px-4">
               Map a repo
             </Link>
           </div>
@@ -677,7 +679,7 @@ export function Landing() {
           <p className="rv mt-6 max-w-[480px] text-[17px] text-[var(--paper-2)]">
             Free for public repos. Your first map takes about a minute.
           </p>
-          <Link to="/map" className="rv tw-btn tw-btn-primary mt-9 h-12 px-6 text-[15px]">
+          <Link to={START} reloadDocument className="rv tw-btn tw-btn-primary mt-9 h-12 px-6 text-[15px]">
             Map a repo
             <IconArrowRight className="size-4" strokeWidth={2} />
           </Link>
@@ -701,7 +703,7 @@ export function Landing() {
           <div>
             <p className="tw-kicker">Product</p>
             <ul className="mt-4 space-y-2.5 text-[14.5px] text-[var(--paper-2)]">
-              <li><Link to="/map" className="hover:text-[var(--paper)]">Map a repo</Link></li>
+              <li><Link to={START} reloadDocument className="hover:text-[var(--paper)]">Map a repo</Link></li>
               <li><a href="#how" className="hover:text-[var(--paper)]">How it works</a></li>
               <li><a href="#faq" className="hover:text-[var(--paper)]">Questions</a></li>
             </ul>
