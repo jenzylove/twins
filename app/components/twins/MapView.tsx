@@ -32,7 +32,13 @@ import type { Diag, MapData, MergeRecord, TwinSet } from "./types";
 export function MapView({ repoId }: { repoId: string }) {
   const { data, error, isLoading } = useTwinsMap(repoId);
   const [params, setParams] = useSearchParams();
-  const selectedId = params.get("set");
+  const urlSet = params.get("set");
+  // The open set lives here so a click shows the panel at once; the URL (which
+  // the agent reads) follows in the background, and agent navigation syncs back.
+  const [selectedId, setSelectedId] = useState<string | null>(urlSet);
+  useEffect(() => {
+    setSelectedId(urlSet);
+  }, [urlSet]);
   const [hoverId, setHoverId] = useState<string | null>(null);
   const [event, setEvent] = useState<MapEvent | null>(null);
   const [lastOutcome, setLastOutcome] = useState<
@@ -45,6 +51,7 @@ export function MapView({ repoId }: { repoId: string }) {
 
   const select = useCallback(
     (setId: string | null) => {
+      setSelectedId(setId);
       setParams(
         (p) => {
           const next = new URLSearchParams(p);
@@ -575,7 +582,6 @@ function ComparePanel({
     });
   }
 
-  const canOneClick = set.mergeable && !merged;
   const differs = useMemo(
     () => (set.kind === "exact" ? new Map<string, Set<number>>() : driftLines(compare.data?.members ?? [])),
     [compare.data, set.kind],
@@ -596,8 +602,8 @@ function ComparePanel({
               : set.kind === "exact"
                 ? `Written ${set.members.length} times, word for word. Fix a bug in one and the other ${set.members.length - 1 === 1 ? "copy keeps" : `${set.members.length - 1} keep`} it.`
                 : drift > 0
-                  ? `Written ${set.members.length} times with ${drift} ${drift === 1 ? "line" : "lines"} changed (highlighted). Fix the shared part in one and the other will not get it.`
-                  : `Written ${set.members.length} times with small changes. Fix the shared part in one and the other will not get it.`}
+                  ? `Written ${set.members.length} times with ${drift} ${drift === 1 ? "line" : "lines"} changed (highlighted), so the assistant writes one version and Twins tests it.`
+                  : `Written ${set.members.length} times with small changes, so the assistant writes one version and Twins tests it.`}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -610,14 +616,14 @@ function ComparePanel({
             </a>
           ) : (
             <>
-              <button
-                type="button"
-                onClick={askAgent}
-                className={`tw-btn ${canOneClick ? "tw-btn-ghost" : "tw-btn-primary"} h-9`}
-              >
-                <IconMessageCircle className="size-4" strokeWidth={1.8} />
-                Ask the agent to merge this
-              </button>
+              {/* One action per set: identical copies merge in one click; copies
+                  that differ need the assistant to write one shared version. */}
+              {!set.mergeable ? (
+                <button type="button" onClick={askAgent} className="tw-btn tw-btn-primary h-9">
+                  <IconMessageCircle className="size-4" strokeWidth={1.8} />
+                  Let the assistant write one version
+                </button>
+              ) : null}
               {set.mergeable ? (
                 <button
                   type="button"
