@@ -1,8 +1,8 @@
 # Connect Claude Code to Twins
 
-Twins runs every merge through one action, `merge-twins`, and that action runs the type check itself. So when Claude Code sends Twins its own merge, Twins checks it in a sandbox and keeps it only if nothing got worse. Claude Code can say done; Twins can still say no.
+Twins runs every merge through one action, `merge-twins`, and that action runs the safety test itself: the type check, the build if it passed before, and the repo's tests if they passed before. So when Claude Code sends Twins its own merge, Twins checks it in a sandbox and keeps it only if nothing got worse. Claude Code can say done; Twins can still say no.
 
-You need Node 22 or newer, Claude Code, and a GitHub account to sign in to Twins.
+You need Node 22 or newer, Claude Code, and a Twins account (email and password). Connecting GitHub is only needed to open pull requests. Codex, Cursor, VS Code Copilot and OpenCode connect the same way: pass `--client codex`, `cursor`, `github-copilot` or `opencode` instead.
 
 ## 1. Connect
 

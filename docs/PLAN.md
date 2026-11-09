@@ -1,5 +1,8 @@
 # Twins build plan
 
+> Planning document written on Nov 5 2026, before the build. Kept as a record. What actually shipped is in the [README](../README.md) and [ENGINE_SPEC.md](ENGINE_SPEC.md).
+
+
 Today is Thu Nov 5 2026. Deadline Mon Nov 9, 11:59 PM PT (Tue Nov 10, 08:59 Lagos). Target: submitted Mon Nov 9 evening Lagos, with margin.
 
 ## Stack

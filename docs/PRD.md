@@ -1,5 +1,8 @@
 # Twins PRD
 
+> Planning document written on Nov 5 2026, before the build. Kept as a record. What actually shipped is in the [README](../README.md) and [ENGINE_SPEC.md](ENGINE_SPEC.md).
+
+
 Builder.io Agent-Native Hackathon. Deadline Mon Nov 9 2026, 11:59 PM PT (Tue Nov 10, 08:59 Lagos).
 
 ## One liner
